@@ -204,7 +204,7 @@ function equal(value,operator){
 					operator.splice(pos,1)
 					break;
 			}
-			if(array.includes("*")||array.includes("/")){
+			if(operator.includes("*")||operator.includes("/")){
 				continue
 			}else{
 				for(const x of array){
