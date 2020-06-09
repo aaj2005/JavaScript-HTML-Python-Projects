@@ -13,21 +13,18 @@ function removeOpCount(tempOp){
 				value.pop()
 				value.push(tempOp)
 				document.getElementById("display").value= value.join('')
-				console.log(operator)
 				operator.pop()
 				operator.push(tempOp)
 			}else if(value[valLastElem]=="-"){
 				value.pop()
 				value.push(tempOp)
 				document.getElementById("display").value= value.join('')
-				console.log(operator)
 				operator.pop()
 				operator.push(tempOp)
 			}else if(value[valLastElem]=="/"){
 				value.pop()
 				value.push(tempOp)
 				document.getElementById("display").value= value.join('')
-				console.log(operator)
 				operator.pop()
 				operator.push(tempOp)
 			}else if(value[valLastElem]=="*"){
@@ -47,7 +44,6 @@ function add(){
 		if(value.length>0){
 			valLastElem= value.length-1
 			removeOpCount("+")
-			console.log(operator)
 				
 		}
 	}
@@ -57,7 +53,6 @@ function sub(){
 		if(value.length>0){
 			valLastElem= value.length-1
 			removeOpCount("-")
-			console.log(operator)
 	}
 }
 
@@ -66,15 +61,12 @@ function mul(){
 	if(value.length>0){
 		valLastElem= value.length-1
 		removeOpCount("*")
-		console.log(operator)
 	}
 }
 function div(){
 	if(value.length>0){
-		console.log(value[-1])
 		valLastElem= value.length-1
 		removeOpCount("/")
-		console.log(operator)
 	}
 }
 	
@@ -90,37 +82,25 @@ function div(){
 				displayInput.value=0
 			}
 		}else if(value[valLastElem]=="+"){
-			console.log("erased")
-			addition--
 			value.pop()
 			operator.pop()
-			console.log("Si")
 			document.getElementById("display").value= value.join('')
 		}else if(value[valLastElem]=="-"){
-			console.log("erased")
-			subtraction--
 			value.pop()
 			operator.pop()
 			document.getElementById("display").value= value.join('')
 		}else if(value[valLastElem]=="/"){
-			console.log("erased")
-			division--
 			value.pop()
 			operator.pop()
 			document.getElementById("display").value= value.join('')
 		}else if(value[valLastElem]=="*"){
-			console.log("erased")
-			multiplication--
 			value.pop()
 			operator.pop()
 			document.getElementById("display").value= value.join('')
 		}else{
-			console.log("erased")
-			console.log(value)
 			value.pop()
 			operator.pop()
 			document.getElementById("display").value= value.join('')
-			console.log(displayInput.value)
 	}
 }
 	
@@ -131,52 +111,42 @@ function div(){
 	function n0(){
 		value.push(0)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n1(){
 		value.push(1)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n2(){
 		value.push(2)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n3(){
 		value.push(3)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n4(){
 		value.push(4)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n5(){
 		value.push(5)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n6(){
 		value.push(6)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n7(){
 		value.push(7)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n8(){
 		value.push(8)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)
 	}
 	function n9(){
 		value.push(9)
 		document.getElementById("display").value= value.join('')
-		console.log(displayInput.value)	
 	}
 	function clearDisplay(){
 		value=[]
@@ -202,7 +172,7 @@ function multiplyEquals(value1,value2){
 	return value1*value2
 }
 
-function equal(){
+function equal(value,operator){
 	valLastElem= value.length-1
 	if(value[valLastElem]=="+"||value[valLastElem]=="-"||value[valLastElem]=="*"||value[valLastElem]=="/"){
 		alert("Incomplete Expression")
@@ -211,10 +181,7 @@ function equal(){
 		const regexAS=/[+-]/g
 		const regexMD=/[*/]/g
 		const regexAll=/[*/+-]/g
-		console.log(value)
 		array=array.split(regexAll)
-		console.log(array)
-		console.log(operator)
 		const counter=array.slice(0)
 		for(let i=0;i<counter.length;i++){
 			let mLoc=operator.indexOf("*");
@@ -240,12 +207,10 @@ function equal(){
 			if(array.includes("*")||array.includes("/")){
 				continue
 			}else{
-				console.log(array, operator)
 				for(const x of array){
 					let aLoc=operator.indexOf("+");
 					let sLoc=operator.indexOf("-");
 					let pos=Math.min(sLoc,aLoc)
-					console.log(aLoc,sLoc,pos)
 					if(aLoc==-1){
 						pos=sLoc
 					}else if(sLoc==-1){
@@ -266,7 +231,25 @@ function equal(){
 				}
 			}
 		}
-		console.log(array[0])
-		document.getElementById("result").value=array[0]
+		return array[0]
 	}
-}				
+}	
+function callEqual(){
+	document.getElementById("result").value=equal(value,operator)
+}
+function unitTest(){
+	console.log("before")
+	assertEQ(2,"1+1")
+	assertEQ(2,"1*2/1")
+	assertEQ(60,"12-12-12+12*6")
+	assertEQ(8082,"672*3*4+5+6*2+1")
+	console.log("after")
+
+}
+function assertEQ(expected,expression){
+	const actual = equal([...expression,],[...expression.replace(/[^-+*/]/g,"")])
+	if(expected!==actual){
+		console.warn(`Expected ${expression} = ${expected} but got ${actual}`)
+	}
+}
+unitTest()
