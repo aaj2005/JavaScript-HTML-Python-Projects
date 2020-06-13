@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function x(){
+		class Level{
+			constructor(Num){
+				this.Number = Num * 10
+			}
+			get Value(){
+				return this.Number *10
+			}
+			set Value(updatedNum){
+				this.Number = updatedNum
+			}
+		}
+
+		let Ali = new Level("10")
+		let Basel = new Level("100")
+		let Wael = new Level("1000")
+		console.log(Ali.Value)
+	}
+	x()
+</script>
+</head>
+</html>
