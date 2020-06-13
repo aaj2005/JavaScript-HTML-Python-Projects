@@ -243,6 +243,7 @@ function unitTest(){
 	assertEQ(2,"1*2/1")
 	assertEQ(60,"12-12-12+12*6")
 	assertEQ(8082,"672*3*4+5+6*2+1")
+	assertEQ(506.666666667,"672*3/4+5/6*2+1")
 	console.log("after")
 
 }
