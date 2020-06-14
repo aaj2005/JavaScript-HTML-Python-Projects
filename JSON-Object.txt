@@ -1,6 +1,0 @@
-{
-	"name":Harry Potter
-	"release-date":1998
-	"ratings":8.1
-
-}
