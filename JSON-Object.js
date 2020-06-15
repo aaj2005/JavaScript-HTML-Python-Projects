@@ -1,12 +1,10 @@
 "use strict"
-
-let xhttp = new XMLHttpRequest()
-xhttp.onreadystatechange = function() {
-	console.log(xhttp.readyState,this.readyState)
-	if (this.readyState == 4 && this.status == 200) {
-		let myArr = JSON.parse(this.responseText);
-		document.getElementById("demo").innerHTML = myArr[0];
-  }
-};
-xhttp.open("GET","JSON-Object.txt", true)
-xhttp.send()
+function getName(){
+	let onRequest = new XMLHttpRequest();
+	onRequest.open("GET" , "http://localhost:1234/JSON-Object.json", true);
+	onRequest.send()
+	onRequest.onload = function() {
+		let x= JSON.parse(onRequest.responseText)
+		document.getElementById("demo").innerHTML = x.name
+	};
+}
