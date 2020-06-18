@@ -1,10 +1,11 @@
 "use strict"
 function getName(){
 	let onRequest = new XMLHttpRequest();
-	onRequest.open("GET" , "http://localhost:1234/JSON-Object.json", true);
+	onRequest.open("GET" , "http://127.0.0.1:1234", true);
 	onRequest.send()
 	onRequest.onload = function() {
-		let x= JSON.parse(onRequest.responseText)
-		document.getElementById("demo").innerHTML = x.name
+		let a=JSON.parse(onRequest.responseText)
+		console.log("a")
+		console.log(a.Item1)
 	};
 }
