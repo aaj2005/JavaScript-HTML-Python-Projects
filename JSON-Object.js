@@ -15,9 +15,11 @@ function sendData(){
 	console.log(key,property)
 	let postData ={};
 	postData[key]=property
-	console.log(postData)
-	console.log(onRequest.readyState)
-	onRequest.open("POST" , "/", true);
-	onRequest.setRequestHeader("Content-type", "application/json; utf-8");
-	onRequest.send(JSON.stringify(postData))
+	if(key!=""&&property!=""){
+		onRequest.open("POST" , "/", true);
+		onRequest.setRequestHeader("Content-type", "application/json; utf-8");
+		onRequest.send(JSON.stringify(postData))
+	}else{
+		alert("Please input a proper value")
+	}
 }
