@@ -1,14 +1,20 @@
 import json
 
+def updateData(newData):
+	dictData= eval(newData)
+	data.append(dictData)
+	createJSON("PythonJSONfile",data)
+	return newData
 def createJSON(filename,data):
-	pathN= "C:\FTP Server Files"+ '/' + filename + '.json'
+	pathN= r"C:\FTP Server Files"+ '/' + filename + '.json'
 	with open(pathN, 'w', encoding="utf-8") as fp:
 		json.dump(data,fp)
 
+
 path = './'
 filename="PythonJSONfile"
-data ={}
-data['Item1'] = 'Item1 Property'
-data['Item2'] = 'Item2 Property'
+data =[]
+data.append({'Item1':'Item1 Property'})
+data.append({'Item2':'Item2 Property'})
 
 createJSON(filename,data)
