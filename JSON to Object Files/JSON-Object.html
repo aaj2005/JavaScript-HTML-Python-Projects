@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html onload="loadDropDown()">
 <head>
 </head>
 <body>
 
 <p id="demo">
 </p>
-<button id="btn" onclick="getName()">Get Name</button><br>
+<button id="btn" onclick="getName()">Get Name</button>
+<select id="selector">
+
+</select>
+<br>
 <input id="key" placeholder="Write the attribute">
 <input id="property" placeholder="Write the Property" required>
+
 <button id="btn" onclick="sendData()" required>Send Data</button>
 <script src="JSON-Object.js"></script>
 </body>
