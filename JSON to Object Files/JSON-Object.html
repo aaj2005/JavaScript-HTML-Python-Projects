@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html onload="loadDropDown()">
 <head>
+<title>Admin Page</title>
+<style>
+#btn{
+	background-color:#c7c7c7;
+	border:solid;
+	margin:10px 10px;
+	padding: 10px 10px;
+	font-size: 100%;
+}
+.spacing{
+	margin:5px 5px 5px 5px;
+}
+
+#btn:hover{
+	background-color:#e6e6e6;
+}
+</style>
 </head>
 <body>
 
@@ -10,10 +27,17 @@
 <select id="selector">
 
 </select>
-<br>
-<input id="key" placeholder="Write the attribute">
-<input id="property" placeholder="Write the Property" required>
 
+<br>
+<input class="spacing" value="Name" size="100" readonly>
+<input class="spacing" value=""id="name" size="100">
+<input class="spacing" value="Release-Date" size="100" readonly>
+<input class="spacing" value=""id="Date" size="100" >
+<input class="spacing" value="Ratings" size="100" readonly>
+<input class="spacing" value=""id="rating" size="100">
+<input class="spacing" value="Genre" size="100" readonly>
+<input class="spacing" value="" id="genre" size="100">
+<br>
 <button id="btn" onclick="sendData()" required>Send Data</button>
 <script src="JSON-Object.js"></script>
 </body>

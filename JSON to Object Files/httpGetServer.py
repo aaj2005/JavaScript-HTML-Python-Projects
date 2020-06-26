@@ -7,26 +7,23 @@ import json
 from ftplib import FTP
 import sched, time
 import getpass
-JSONFileName=1
+
+JSONFileName=0
 
 print("Username:")
 user = input()
 password = getpass.getpass()
-ftp = FTP("192.168.100.52")
-ftp.login(user,password)
+
 def returnStoredFile(passedContent):
 	global returnedFTPData
 	returnedFTPData = passedContent
-def getInt(listInput):
-	b=0
+def getJSON(listInput):
+	b=0   
 	newList=[]
 	for p in listInput:
-		try:
-			newList.append(int(listInput[b]))
-			b+=1
-		except:
-			b+=1
-			continue
+		if p[1]==".json":
+			newList.append(p[0])
+		b+=1
 	return newList
 def updateData(newData,filename):
 	ioFile=io.BytesIO(newData)
@@ -44,48 +41,56 @@ class GetHandler(BaseHTTPRequestHandler):
 			mimeType= os.path.splitext(x)
 			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 			self.end_headers()
-			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs" + x
+			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\JSON to Object Files" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))
 		else:
-			pathN= "C:\FTP Server Files/PythonJSONfile.json"
-			with open(pathN, 'r', encoding="utf-8") as fp:
-				a = fp.read().encode("utf-8")
-			parsed_path = parse.urlparse(self.path)
 			self.send_response(200)
 			self.send_header('Content-Type', 'application/json; utf-8')
 			self.end_headers()
-			self.wfile.write(a)
+			self.wfile.write(b"")
 
 	def do_POST(self):
 		global JSONFileName
 		content_length = int(self.headers.get('content-length'))
 		body = self.rfile.read(content_length)
 		decodedBody = body.decode("utf-8")
+		global ftp
+		ftp = FTP("192.168.100.40")
+		ftp.login(user,password)
 		if  decodedBody == 'loadDropDown':
-			a=[]
+			storedFiles=[]
 			z=0
 			for x in ftp.nlst():
-				a.append(x)
-				a[z]=os.path.splitext(a[z])
-				a[z]=a[z][0]
+				storedFiles.append(x)
+				storedFiles[z]=os.path.splitext(storedFiles[z])
 				z+=1
-			updatedList=getInt(a)
-			JSONFileName = max(updatedList)
+			updatedList=getJSON(storedFiles)
+			listInStr = ""
+			z=0
+			for x in updatedList:
+				
+				listInStr += x +","
+				updatedList[z]=int(updatedList[z])
+				z+=1
+			listInStr = listInStr[:-1]	
+			try:
+				JSONFileName = max(updatedList)
+			except:
+				null=""
 			self.send_response(200)
 			self.send_header('Content-Type', 'text/strings; utf-8')
 			self.end_headers()
-			self.wfile.write(str(JSONFileName).encode("utf-8"))
-		elif str(decodedBody) <= str(JSONFileName):
-			print(ftp)
+			self.wfile.write(listInStr.encode("utf-8"))
+		elif parse.urlparse(self.path).path == "/getName":
 			ftp.retrbinary('RETR '+decodedBody+".json",returnStoredFile)
-			parsed_path = parse.urlparse(self.path)
 			self.send_response(200)
 			self.send_header('Content-Type', 'application/json; utf-8')
 			self.end_headers()
 			self.wfile.write(returnedFTPData)
-		else:
-			updateData(body,JSONFileName+1)
+		elif parse.urlparse(self.path).path == "/send":
+			
+			updateData(body,int(JSONFileName)+1)
 			self.send_response(200)
 			self.send_header('Content-Type', 'text/javascript; utf-8')
 			self.end_headers()
