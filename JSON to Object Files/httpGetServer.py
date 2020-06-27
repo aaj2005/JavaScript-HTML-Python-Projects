@@ -1,5 +1,4 @@
 from http.server import BaseHTTPRequestHandler
-from urllib import parse
 import json
 import io
 import os
@@ -7,12 +6,16 @@ import json
 from ftplib import FTP
 import sched, time
 import getpass
+from urllib import parse 
+from urllib import request 
 
 JSONFileName=0
 
-print("Username:")
-user = input()
-password = getpass.getpass()
+#print("Username:")
+#user = input()
+#password = getpass.getpass()
+user="Ali"
+password="aaj2005"
 
 def returnStoredFile(passedContent):
 	global returnedFTPData
@@ -28,10 +31,38 @@ def getJSON(listInput):
 def updateData(newData,filename):
 	ioFile=io.BytesIO(newData)
 	ftp.storbinary('Stor '+str(filename)+".json", ioFile)
+def loadDropDown():
+			ftp = FTP("192.168.100.40")
+			ftp.login(user,password)
+			ftp.cwd('JSON Files')
+			storedFiles=[]
+			z=0
+			for x in ftp.nlst():
+				storedFiles.append(x)
+				storedFiles[z]=os.path.splitext(storedFiles[z])
+				z+=1
+			updatedList=getJSON(storedFiles)
+			global listInStr
+			listInStr = ""
+			z=0
+			for x in updatedList:
+				
+				listInStr += x +","
+				updatedList[z]=int(updatedList[z])
+				z+=1
+			listInStr = listInStr[:-1]	
+			try:
+				JSONFileName = max(updatedList)
+
+			except:
+				null=""
+			return JSONFileName	
 
 class GetHandler(BaseHTTPRequestHandler):
+
 	def do_GET(self):
-		x = parse.urlparse(self.path).path
+		urlRecieved=parse.urlparse(self.path).path
+		x =  parse.urlparse(self.path).path
 		dictionary={
 			"html":"text/html",
 			"js":"text/javascript"
@@ -44,59 +75,79 @@ class GetHandler(BaseHTTPRequestHandler):
 			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\JSON to Object Files" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))
+		elif (x in ("/searchMenu.html","/searchMenu.js")):
+			self.send_response(200)
+			mimeType= os.path.splitext(x)
+			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
+			self.end_headers()
+			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\JSON to Object Files" + x
+			with open(path,"r",encoding="utf-8") as f:
+				self.wfile.write(f.read().encode("utf-8"))
+		elif urlRecieved == "/getArrayCount":
+			JSONFileName=loadDropDown()
+			self.send_response(200)
+			self.send_header('Content-Type', 'text/strings; utf-8')
+			self.end_headers()
+			self.wfile.write(str(JSONFileName).encode("utf-8"))
+		elif urlRecieved == "/loadImg":
+			fh = request.urlopen('ftp://'+user+":"+password+'@192.168.100.40/Movie Poster/'+decodedBody+'.jpg')
+			self.send_response(200)
+			self.send_header('Content-Type', 'image/jpeg; utf-8')
+			self.end_headers()
+			self.wfile.write(fh.read())
 		else:
 			self.send_response(200)
 			self.send_header('Content-Type', 'application/json; utf-8')
 			self.end_headers()
 			self.wfile.write(b"")
 
+
+
 	def do_POST(self):
+		urlRecieved=parse.urlparse(self.path).path
 		global JSONFileName
 		content_length = int(self.headers.get('content-length'))
 		body = self.rfile.read(content_length)
+		global decodedBody
 		decodedBody = body.decode("utf-8")
 		global ftp
 		ftp = FTP("192.168.100.40")
 		ftp.login(user,password)
 		if  decodedBody == 'loadDropDown':
-			storedFiles=[]
-			z=0
-			for x in ftp.nlst():
-				storedFiles.append(x)
-				storedFiles[z]=os.path.splitext(storedFiles[z])
-				z+=1
-			updatedList=getJSON(storedFiles)
-			listInStr = ""
-			z=0
-			for x in updatedList:
-				
-				listInStr += x +","
-				updatedList[z]=int(updatedList[z])
-				z+=1
-			listInStr = listInStr[:-1]	
-			try:
-				JSONFileName = max(updatedList)
-			except:
-				null=""
+			loadDropDown()
 			self.send_response(200)
 			self.send_header('Content-Type', 'text/strings; utf-8')
 			self.end_headers()
 			self.wfile.write(listInStr.encode("utf-8"))
-		elif parse.urlparse(self.path).path == "/getName":
+		elif urlRecieved == "/getName":
+			ftp = FTP("192.168.100.40")
+			ftp.login(user,password)
+			ftp.cwd('JSON Files')
 			ftp.retrbinary('RETR '+decodedBody+".json",returnStoredFile)
 			self.send_response(200)
 			self.send_header('Content-Type', 'application/json; utf-8')
 			self.end_headers()
 			self.wfile.write(returnedFTPData)
-		elif parse.urlparse(self.path).path == "/send":
+		
+		elif urlRecieved == "/send":
 			
 			updateData(body,int(JSONFileName)+1)
 			self.send_response(200)
 			self.send_header('Content-Type', 'text/javascript; utf-8')
 			self.end_headers()
 			JSONFileName+=1
+		elif urlRecieved == "/loadImg":
+			ftp = FTP("192.168.100.40")
+			ftp.login(user,password)
+			fh = request.urlopen('ftp://'+user+":"+password+'@192.168.100.40/Movie Poster/'+decodedBody+'.jpg')
+			self.send_response(200)
+			self.send_header('Content-Type', 'image/jpeg; utf-8')
+			self.end_headers()
+			self.wfile.write(fh.read())
+			
 if __name__ == '__main__':
 	from http.server import HTTPServer
 	server= HTTPServer(('localhost',1234), GetHandler)
 	print("Server Starting")
 	server.serve_forever()
+
