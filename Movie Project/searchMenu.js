@@ -1,4 +1,5 @@
-
+"use strict"
+let videoTag= document.getElementById("video")
 let responseArray=[]
 let objectList={}
 let onRequest = new XMLHttpRequest();
@@ -32,6 +33,8 @@ function getEventTarget(e) {
 }
 
 function on() {
+	let imageTag = document.getElementById("overlayImg")
+	let overlay = document.getElementById("overlay")
 	let imgRequest= new XMLHttpRequest()
 	let ul = document.getElementById('myMenu');
 	ul.onclick = function(event) {
@@ -40,15 +43,46 @@ function on() {
 		imgRequest.setRequestHeader("Content-type", "text/strings; utf-8");
 		imgRequest.send(objectList[target])
 		imgRequest.onload= function(){		
-			document.getElementById("overlayImg").src= "/loadImg"
-			document.getElementById("overlay").style.display = "flex";
+			imageTag.src= "/loadImg"
+			overlay.style.display = "flex";
+			videoTag.style.display = "none";
+			imageTag.style.display= "flex"
+			imageTag.addEventListener("click",function(){
+				imgRequest.open("POST", "/loadVid", true)
+				imgRequest.setRequestHeader("Content-type", "text/strings; utf-8")
+				imgRequest.send(objectList[target])
+				imgRequest.onload= function(){
+					imageTag.style.display= "none"
+					videoTag.style.display= "flex"
+					videoTag.src="/loadVid"
+
+
+				}
+			})
 		}
 	}
 }
+let videoStatus = false
+videoTag.addEventListener("click",function(){
+	if(videoStatus==false || videoTag.paused){
+		videoTag.play()
+		videoStatus= true
+		console.log(videoTag.seekable.end(0))
+	}else{
+		videoTag.pause()
+		videoStatus = false
+		
+	}
+	
+	})
+	
+document.addEventListener("keydown",function(){if(event.key=="Escape"&& document.getElementById("overlay").style.display == "flex"){
+	document.getElementById("overlay").style.display = "none";
+	document.getElementById("overlayImg").style.display= "none"
+	document.getElementById("video").src=""
+	console.log(true)}})
 
-function off() {
-  document.getElementById("overlay").style.display = "none";
-}
+
 function myFunction() {
 	let x, input, filter, ul, li, a, i,genre;
 	input = document.getElementById("mySearch");

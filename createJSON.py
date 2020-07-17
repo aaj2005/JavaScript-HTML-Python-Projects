@@ -14,7 +14,6 @@ def createJSON(filename,data):
 path = './'
 filename="PythonJSONfile"
 data =[]
-data.append({'Item1':'Item1 Property'})
-data.append({'Item2':'Item2 Property'})
+
 
 createJSON(filename,data)
