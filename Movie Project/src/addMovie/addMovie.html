@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html onload="loadDropDown()">
+<head>
+<title>Admin Page</title>
+<style>
+#btn{
+	background-color:#c7c7c7;
+	border:solid;
+	margin:10px 10px;
+	padding: 10px 10px;
+	font-size: 100%;
+}
+.spacing{
+	margin:5px 5px 5px 5px;
+}
+
+#btn:hover{
+	background-color:#e6e6e6;
+}
+</style>
+</head>
+<body>
+
+<p id="demo">
+</p>
+<br>
+<input type="radio" name="choose" onclick="addMovie()" checked>Add Movie</input>
+<input type="radio" name="choose" onclick="getName()">Edit Movie</input>
+<div id="sendMovie" style="display:block">
+<br>
+<input class="spacing" value="Name" size="100" readonly>
+<input class="spacing" value=""id="name" size="100">
+<input class="spacing" value="Release-Date" size="100" readonly>
+<input type="date" class="spacing" value=""id="release" size="100" >
+<input class="spacing" value="Category" size="100" readonly>
+<input class="spacing" value="" id="category" size="100">
+<input class="spacing" value="Run Time" size="100" readonly>
+<input type="number" min="1" class="spacing" value="" id="runTime" size="100">
+<input class="spacing" value="Contract Expiry" size="100" readonly>
+<input type="date" class="spacing" value="" id="expiry" size="100">
+<input class="spacing" value="Restrictions" size="100" readonly>
+<input type="number" min="0" max="21"class="spacing" value="" id="restriction" size="100">
+<br>
+<button onclick="sendData()" required>Send Data</button>
+</div>
+
+<div id="updateMovie"  style="display:none">
+<br>
+<button onclick="getName()">Choose Movie</button>
+<select id="selector">
+
+</select>
+<br>
+
+<br>
+<input class="spacing" value="Name" size="100" readonly>
+<input class="spacing" value=""id="name1" size="100">
+<input class="spacing" value="Release-Date" size="100" readonly>
+<input type="date" class="spacing" value=""id="release1" size="100" >
+<input class="spacing" value="Category" size="100" readonly>
+<input class="spacing" value="" id="category1" size="100">
+<input class="spacing" value="Run Time" size="100" readonly>
+<input type="number" min="1" class="spacing" value="" id="runTime1" size="100">
+<input class="spacing" value="Contract Expiry" size="100" readonly>
+<input type="date" class="spacing" value="" id="expiry1" size="100">
+<input class="spacing" value="Restrictions" size="100" readonly>
+<input type="number" min="0" max="21"class="spacing" value="" id="restriction1" size="100">
+<br>
+<button onclick="updateData()" required>Update</button>
+</div>
+<script src="addMovie.js"></script>
+</body>
+</html>

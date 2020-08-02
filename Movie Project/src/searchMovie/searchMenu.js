@@ -16,10 +16,10 @@ onRequest.onload = function(){
 			let a = document.createElement("a");
 			let ul= document.getElementById("myMenu")
 			let li=document.createElement("li")
-			let inJSON=JSON.parse(request.responseText)
-			objectList[inJSON.name]=i
+			let inJSON=request.responseText.split(',')
+			objectList[inJSON[1]]=i
 			responseArray.push(inJSON)
-			a.textContent=inJSON.name
+			a.textContent=inJSON[1]
 			a.setAttribute("onClick","on()")
 			li.appendChild(a)
 			ul.appendChild(li)				
@@ -76,11 +76,14 @@ videoTag.addEventListener("click",function(){
 	
 	})
 	
-document.addEventListener("keydown",function(){if(event.key=="Escape"&& document.getElementById("overlay").style.display == "flex"){
-	document.getElementById("overlay").style.display = "none";
-	document.getElementById("overlayImg").style.display= "none"
-	document.getElementById("video").src=""
-	console.log(true)}})
+document.addEventListener("keydown",function(){
+	if(event.key=="Escape"&& document.getElementById("overlay").style.display == "flex"){
+		document.getElementById("overlay").style.display = "none";
+		document.getElementById("overlayImg").style.display= "none"
+		document.getElementById("video").src=""
+	}
+})
+
 
 
 function myFunction() {

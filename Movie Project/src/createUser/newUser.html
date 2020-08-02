@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create User</title>
+<style>
+html{
+	background-color:#bdc9de;
+}
+#add{
+	position:absolute;
+	top: 20%;
+	left:40%;
+	border:8px solid;
+	background-color:#d4d4d4;
+	font-size: 100px;
+	user-select: none; 
+	padding:100px;
+}
+#add:hover{
+	background-color:#b8b8b8;
+}
+#overlay {
+  position: fixed; /* Sit on top of the page content */
+  justify-content: center;
+  align-items: center;
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+}
+</style>
+</head>
+
+<body >
+<div id='overlay'>
+</div>
+<button  id='add'>+</button>
+
+
+<script src="newUser.js"></script>
+
+</body>
+
+</html>
