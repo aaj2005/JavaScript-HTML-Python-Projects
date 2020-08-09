@@ -2,7 +2,7 @@
 import sqlite3
 def connectToDataBase():	
 	global conn
-	conn = sqlite3.connect('C:/Users/alial/OneDrive/Desktop/Programs/JavaScript Practice Programs/Movie Project/dataBase/database.db')
+	conn = sqlite3.connect('C:/Users/alial/Desktop/Programs/JavaScript Practice Programs/Movie Project/dataBase/database.db')
 	conn.execute("PRAGMA foreign_keys=1")
 	global c
 	c = conn.cursor()

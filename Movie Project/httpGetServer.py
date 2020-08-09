@@ -1,27 +1,21 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import io
-import cgi
 import os
 from ftplib import FTP
 import getpass
-from urllib import parse 
-from urllib import request 
+from urllib import parse, request
 import re
-from ast import literal_eval
-import smtplib
 from email.message import EmailMessage
 import sys
 import hash
 from datetime import datetime
 global allowLogin
 allowLogin=False
-
 sys.path.append('database')
 import SQLite
-sys.path.append('C:/Users/alial/OneDrive/Desktop/Programs/Gmail API')
+from dateFormat import checkDate, checkDateFormat
+sys.path.append('C:/Users/alial/Desktop/Programs/Gmail API')
 import Gmail
-
 #print("Username:")
 #user = input()
 #password = getpass.getpass()
@@ -29,92 +23,7 @@ import Gmail
 user="Ali" #ftp user name
 password="aaj2005" #ftp password
 ipaddress='192.168.100.40' #ipv4 address
-def checkDate(movieDataInDict,x):
-	month=datetime.today().strftime('%m')
-	day=datetime.today().strftime('%d')
-	year=datetime.today().strftime('%y')
-	if movieDataInDict[x][2:4] >= year:
-		if movieDataInDict[x][2:4] == year:
-			if movieDataInDict[x][5:7] >= month:
-				if movieDataInDict[x][5:7] == month:
-					if movieDataInDict[x][8:] >= day:
-						return True
-					else:
-						return False
-				else:
-					return True
-			else:
-				return False
-		else:
-			return True
-	else:
-		return False
-def checkDateFormat(movieDataInDict,x,withDate):
-	error=False
-	noError=True
-	compiled= re.compile("[0-9]{4}\-[0-9]{2}\-[0-9]{2}")
-	continueCheck=True
-	if continueCheck:
-		if compiled.match(movieDataInDict[x]) is not None:
-			if movieDataInDict[x][5] <='1':
-				if movieDataInDict[x][5] =='1':
-					if movieDataInDict[x][6] <='2':
-						if movieDataInDict[x][6]== '2' or movieDataInDict[x][6]== '0':
-							if movieDataInDict[x][0:4]!= "0000" and movieDataInDict[x][8:]>= "00" and movieDataInDict[x][8:]<="31":
-								return noError
-							else:
-								return error
-						elif movieDataInDict[x][6]=='1':
-							if movieDataInDict[x][0:4]!= "0000" and movieDataInDict[x][8:]>= "00" and movieDataInDict[x][8:]<="30":
-								return noError
-							else:
-								return error
-						else:
-							return error
-					else:
-						return error
-				elif movieDataInDict[x][5] == '0' and movieDataInDict[x][6] != '0':
-					if movieDataInDict[x][5:7] in ('04','06','09','11'):  
-						if movieDataInDict[x][8:] <='30' and movieDataInDict[x][8:]>'00':
-							if movieDataInDict[x][0:4]!= "0000":
-								return noError
-							else:
-								return error
-						else:
-							return error
-					elif movieDataInDict[x][5:7] in ('01','03','05','07','08','10','12'):
-						if movieDataInDict[x][8:] <='31' and movieDataInDict[x][8:]>'00':
-							if movieDataInDict[x][0:4]!= "0000":
-								return noError
-							else:
-								return error
-					elif movieDataInDict[x][5:7] == '02':
-						if int(movieDataInDict[x][0:4]) %4 == 0 and int(movieDataInDict[x][0:4]) %100 ==0 and int(movieDataInDict[x][0:4]) %400 == 0:
-							
-							if movieDataInDict[x][8:] <='29' and movieDataInDict[x][8:]>'00':
-								if movieDataInDict[x][0:4]!= "0000":
-									return noError
-								else:
-									return error
-							else:
-								return error
-						elif movieDataInDict[x][8:] <='28' and movieDataInDict[x][8:]>'00':
-							if movieDataInDict[x][0:4]!= "0000":
-								return noError
-							else:
-								return error
-						else:
-							return error
-					else:
-						return error
-				else :
-					return error
-			else:
-				return error
-		else:
-			return error
-	else:
-		return error
+
 
 def returnStoredFile(passedContent):
 	global returnedFTPData
@@ -141,9 +50,7 @@ def loadDropDown():
 				listInStr= maxID[0][0]
 			except:
 				listInStr="No Data Stored"
-
 class GetHandler(BaseHTTPRequestHandler):
-
 	def do_GET(self):
 		urlRecieved=parse.urlparse(self.path).path
 		x =  parse.urlparse(self.path).path
@@ -156,7 +63,7 @@ class GetHandler(BaseHTTPRequestHandler):
 			mimeType= os.path.splitext(x)
 			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 			self.end_headers()
-			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\addMovie" + x
+			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\addMovie" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))
 		elif (x in ("/searchMenu.html","/searchMenu.js")):
@@ -165,7 +72,7 @@ class GetHandler(BaseHTTPRequestHandler):
 				mimeType= os.path.splitext(x)
 				self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 				self.end_headers()
-				path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\searchMovie" + x
+				path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\searchMovie" + x
 				with open(path,"r",encoding="utf-8") as f:
 					self.wfile.write(f.read().encode("utf-8"))
 			else:
@@ -177,7 +84,7 @@ class GetHandler(BaseHTTPRequestHandler):
 			mimeType= os.path.splitext(x)
 			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 			self.end_headers()
-			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createAccount" + x
+			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createAccount" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))
 		elif (x in ("/newUser.html","/newUser.js")):
@@ -185,7 +92,7 @@ class GetHandler(BaseHTTPRequestHandler):
 			mimeType= os.path.splitext(x)
 			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 			self.end_headers()
-			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createUser" + x
+			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createUser" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))	
 		elif (x in ("/login.html","/Login.js")):
@@ -193,7 +100,7 @@ class GetHandler(BaseHTTPRequestHandler):
 			mimeType= os.path.splitext(x)
 			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 			self.end_headers()
-			path = r"C:\Users\alial\OneDrive\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\login" + x
+			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\login" + x
 			with open(path,"r",encoding="utf-8") as f:
 				self.wfile.write(f.read().encode("utf-8"))
 		elif urlRecieved == "/getArrayCount":
