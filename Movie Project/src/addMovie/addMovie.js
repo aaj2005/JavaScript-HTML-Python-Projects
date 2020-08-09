@@ -128,7 +128,7 @@ function sendData(){
 		onRequest.onload = function(){
 			loadDropDown()
 			if (onRequest.responseText == "True"){
-				console.log()
+				window.alert("Movie Successfully added")
 			}else{
 				window.alert("Invalid Value")
 			}

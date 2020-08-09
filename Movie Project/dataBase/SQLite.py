@@ -1,12 +1,13 @@
-#Hellooooooo
+import sys
 import sqlite3
+sys.path.append('C:/Users/alial/Desktop/Programs/JavaScript Practice Programs/Movie Project')
+import classes
 def connectToDataBase():	
 	global conn
 	conn = sqlite3.connect('C:/Users/alial/Desktop/Programs/JavaScript Practice Programs/Movie Project/dataBase/database.db')
 	conn.execute("PRAGMA foreign_keys=1")
 	global c
 	c = conn.cursor()
-
 def createTable():
 	c.execute("""CREATE Table accounts (
 				accountID INTEGER PRIMARY KEY, 
@@ -42,6 +43,34 @@ def createTable():
 				restriction int
 				)""")
 
+def retrAcc():
+	c.execute("SELECT * FROM accounts")
+	accountData = c.fetchall()
+	allAccounts=[]
+	for x in accountData:
+		allAccounts.append(classes.accounts(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]))
+	return allAccounts
+def retrShow():
+	c.execute("SELECT * FROM tvShows")
+	showData = c.fetchall()
+	allShows=[]
+	for x in accountData:
+		allShows.append(classes.tvShows(x[0],x[1],x[2],x[3],x[4],x[5],x[6]))
+	return allShows
+def retrUsers():
+	c.execute("SELECT * FROM users")
+	showData = c.fetchall()
+	allUsers=[]
+	for x in accountData:
+		allUsers.append(classes.users(x[0],x[1],x[2],x[3]))
+	return allUsers
+def retrList():
+	c.execute("SELECT * FROM myList")
+	showData = c.fetchall()
+	allLists=[]
+	for x in accountData:
+		allLists.append(classes.myList(x[0],x[1]))
+	return allLists
 def insertAccounts(ID, firstName, lastName, dateOfBirth, username, password, email, active, package):
 	connectToDataBase()
 	with conn:

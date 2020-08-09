@@ -1,5 +1,4 @@
 from http.server import BaseHTTPRequestHandler
-import json
 import os
 from ftplib import FTP
 import getpass
@@ -16,6 +15,14 @@ import SQLite
 from dateFormat import checkDate, checkDateFormat
 sys.path.append('C:/Users/alial/Desktop/Programs/Gmail API')
 import Gmail
+import classes
+accountData = SQLite.retrAcc()
+showData = SQLite.retrShow()
+userData = SQLite.retrUser()
+listData = SQLite.retrList()
+print(accountData)
+
+
 #print("Username:")
 #user = input()
 #password = getpass.getpass()
@@ -24,7 +31,11 @@ user="Ali" #ftp user name
 password="aaj2005" #ftp password
 ipaddress='192.168.100.40' #ipv4 address
 
-
+def sendResponse(self,responseCode,keyword,mime,data):
+	self.send_response(responseCode)
+	self.send_header(keyword, mime)
+	self.end_headers()
+	self.wfile.write(data)
 def returnStoredFile(passedContent):
 	global returnedFTPData
 	returnedFTPData = passedContent
@@ -34,99 +45,183 @@ def insertShows(movieData):
 		newID=SQLite.getMaxValue("showID", "tvShows")[0][0]+1
 		if newID >= 1:
 			SQLite.insertShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
+			showData.append(classes.tvShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 	except:
 			SQLite.insertShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
+			showData.append(classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
+
 def updateShows(movieData,ID):
 	try:
 		if int(ID) >= 1:
 			SQLite.updateShows(ID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
+			global accountData
+			showData = SQLite.retrShow()
 	except:
 			SQLite.insertShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
+			showData.append(classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 def loadDropDown():
-			maxID=SQLite.getMaxValue("showID", "tvShows")
-			global listInStr
-			listInStr = ""
+	maxID=SQLite.getMaxValue("showID", "tvShows")
+	global listInStr
+	listInStr = ""
+	try:
+		listInStr= maxID[0][0]
+	except:
+		listInStr="No Data Stored"
+def openRequest(self,x,url):
+	mimeType= os.path.splitext(x)
+	dictionary={
+		"html":"text/html",
+		"js":"text/javascript"
+	}
+	self.send_response(200)
+	self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
+	self.end_headers()
+	path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src"+ url + x
+	with open(path,"r",encoding="utf-8") as f:
+		self.wfile.write(f.read().encode("utf-8"))
+def checkMovieData(self,movieDataInDict):
+	if type(movieDataInDict) is dict:
+		for x in movieDataInDict:
+			if x=="name":
+				movieNameLen=len(movieDataInDict[x])
+				if movieNameLen>150:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+				else:
+					pass
+			elif x=="date":
+				result=checkDateFormat(movieDataInDict,x,False)
+				if result:
+					checkDate(movieDataInDict,x)
+				else:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+			elif x=="category":
+				categoryLen=len(movieDataInDict[x])
+				if categoryLen>150:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+				else:
+					pass
+			elif x=="runTime":
+				try:
+					int(movieDataInDict[x])
+				except:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+			elif x=="expiry":
+				result=checkDateFormat(movieDataInDict,x,True)
+				if result:
+					checkDate(movieDataInDict,x)
+				else:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+			elif x=="restriction":
+				try:
+					int(movieDataInDict[x]) 
+					condition = True
+				except:
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+					break
+			elif x=="id":
+				movieID= movieDataInDict[x]
+				condition = True
+				return condition,movieID
+			else:
+				condition=False
+				break
+	else:
+		sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+	return condition
+
+
+def creatNewAccount(self,decodedBody,invalidOption):
+	for x in ('firstName','lastName','dateOfBirth','user','pass','mail','package'):
+		arr = re.findall(x,decodedBody)
+		if len(arr) > 1:
+			if arr[0] != 'mail':
+				invalidOption=False
+				sendResponse(self,301,'Location','/newAccount.html',b'')
+				break
+			else:
+				pass
+		if arr ==[]:
+			invalidOption=False
+			sendResponse(self,301,'Location','/newAccount.html',b'')
+			break
+	if invalidOption:
+		formPos=[]
+		pos=0
+		for x in ('firstName','lastName','dateOfBirth','user','pass','mail','package'):
+			formPos.append(re.search(x,decodedBody))
+			formPos[pos]=formPos[pos].span()
+			pos+=1
+		formDict={} 
+		pos=1
+		for slotNum in formPos:
+			slotField=formDict[decodedBody[slotNum[0]:slotNum[1]]]
+			if slotNum[1]!= formPos[-1][1]:
+				if decodedBody[slotNum[0]:slotNum[1]] =='pass':
+					slotField=hash.hash_password(decodedBody[slotNum[1]+1:formPos[pos][0]-1])
+				else:
+					slotField=decodedBody[slotNum[1]+1:formPos[pos][0]-1]
+			else:
+				slotField=decodedBody[slotNum[1]+1:]
+			pos+=1
+		for x in formDict:
+			formDict[x]=re.sub('\+',' ',formDict[x])
+		
+		userCompare=SQLite.retrieveData('accounts','email,username','',formDict['mail'])
+		mailCompare=SQLite.retrieveData('accounts','email,username','',formDict['user'])
+		if mailCompare == [] and userCompare==[]:
 			try:
-				listInStr= maxID[0][0]
+				newID=SQLite.getMaxValue('accountID','accounts')[0][0]+1
+				SQLite.insertAccounts(newID,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
+				accountData.append(classes.accounts(newID,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package']))
 			except:
-				listInStr="No Data Stored"
+				SQLite.insertAccounts(1,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
+				accountData.append(classes.accounts(1,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package']))
+			sendResponse(self,301,'Location','/login.html',b'')
+			userEmail= formDict['mail']
+			contentSent="Dear "+formDict['firstName']+""",
+This email is to confirm your account has been activated. 
+
+Thank you""" 
+			# send_message(sender, to, subject, content)
+			Gmail.send_message('botbyali5@gmail.com', userEmail, 'Account Activation', contentSent)
+		else:
+			sendResponse(self,301,'Location','/newAccount.html',b'')
+
+
+
 class GetHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
-		urlRecieved=parse.urlparse(self.path).path
 		x =  parse.urlparse(self.path).path
-		dictionary={
-			"html":"text/html",
-			"js":"text/javascript"
-		}
+		urlRecieved=parse.urlparse(self.path).path
 		if(x in ("/addMovie.html", "/addMovie.js")):
-			self.send_response(200)
-			mimeType= os.path.splitext(x)
-			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
-			self.end_headers()
-			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\addMovie" + x
-			with open(path,"r",encoding="utf-8") as f:
-				self.wfile.write(f.read().encode("utf-8"))
-		elif (x in ("/searchMenu.html","/searchMenu.js")):
+			openRequest(x,r"\addMovie")
+		elif urlRecieved in ("/searchMenu.html","/searchMenu.js"):
 			if allowLogin:
-				self.send_response(200)
-				mimeType= os.path.splitext(x)
-				self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
-				self.end_headers()
-				path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\searchMovie" + x
-				with open(path,"r",encoding="utf-8") as f:
-					self.wfile.write(f.read().encode("utf-8"))
+				openRequest(self,x,r"\searchMovie")
 			else:
-				self.send_response(301)
-				self.send_header('Location','/login.html')
-				self.end_headers()
-		elif (x in ("/newAccount.html","/newAccount.js")):
-			self.send_response(200)
-			mimeType= os.path.splitext(x)
-			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
-			self.end_headers()
-			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createAccount" + x
-			with open(path,"r",encoding="utf-8") as f:
-				self.wfile.write(f.read().encode("utf-8"))
-		elif (x in ("/newUser.html","/newUser.js")):
-			self.send_response(200)
-			mimeType= os.path.splitext(x)
-			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
-			self.end_headers()
-			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\createUser" + x
-			with open(path,"r",encoding="utf-8") as f:
-				self.wfile.write(f.read().encode("utf-8"))	
-		elif (x in ("/login.html","/Login.js")):
-			self.send_response(200)
-			mimeType= os.path.splitext(x)
-			self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
-			self.end_headers()
-			path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src\login" + x
-			with open(path,"r",encoding="utf-8") as f:
-				self.wfile.write(f.read().encode("utf-8"))
+				sendResponse(self,301,'Location','/login.html',b'')
+		elif urlRecieved in ("/newAccount.html","/newAccount.js"):
+			openRequest(self,x,r"\createAccount")
+		elif urlRecieved in ("/newUser.html","/newUser.js"):
+			openRequest(self,x,r"\createUser")
+		elif urlRecieved in ("/login.html","/Login.js"):
+			openRequest(self,x,r"\login")
 		elif urlRecieved == "/getArrayCount":
 			loadDropDown()
-			self.send_response(200)
-			self.send_header('Content-Type', 'text/strings; utf-8')
-			self.end_headers()
-			self.wfile.write(str(listInStr).encode("utf-8"))
+			sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
 		elif urlRecieved == "/loadImg":
 			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
-			self.send_response(200)
-			self.send_header('Content-Type', 'image/jpeg; utf-8')
-			self.end_headers()
-			self.wfile.write(fh.read())
+			sendResponse(self,200,'Content-Type','image/jpeg; utf-8',fh.read())
 		elif urlRecieved == "/loadVid":
 			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
-			self.send_response(200)
-			self.send_header('Content-Type', 'video/mp4; utf-8')
-			self.end_headers()
-			self.wfile.write(fh.read())
+			sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
 		else:
-			self.send_response(200)
-			self.send_header('Content-Type', 'application/json; utf-8')
-			self.end_headers()
-			self.wfile.write(b"")
-
+			sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 
 
 	def do_POST(self):
@@ -141,206 +236,46 @@ class GetHandler(BaseHTTPRequestHandler):
 		ftp.login(user,password)
 		if  decodedBody == 'loadDropDown':
 			loadDropDown()
-			self.send_response(200)
-			self.send_header('Content-Type', 'text/strings; utf-8')
-			self.end_headers()
-			self.wfile.write(str(listInStr).encode("utf-8"))
+			sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
 		elif urlRecieved == "/getName":
 			if decodedBody !="":
-				showData=SQLite.retrieveData('tvShows',"*",decodedBody)
-				showData=re.sub('[()]','',str(showData))
-				showData=re.sub("[\'']",'',showData)
-				showData= showData[1:-1]
-				self.send_response(200)
-				self.send_header('Content-Type', 'application/json; utf-8')
-				self.end_headers()
-				self.wfile.write(str(showData).encode('utf-8'))
+				showInfo=SQLite.retrieveData('tvShows',"*",decodedBody)
+				showInfo=re.sub('[()]','',str(showInfo))
+				showInfo=re.sub("[\'']",'',showInfo)
+				showInfo= showData[1:-1]
+				sendResponse(self,200,'Content-Type','application/json; utf-8',str(showInfo).encode('utf-8'))
 			else:
-				self.send_response(200)
-				self.send_header('Content-Type', 'application/json; utf-8')
-				self.end_headers()
-				self.wfile.write(b'None')
+				sendResponse(self,200,'Content-Type','application/json; utf-8',b'None')
 		
 		elif urlRecieved == "/send":
 			condition=False
 			movieDataInDict=eval(decodedBody)
-			if type(movieDataInDict) is dict:
-				for x in movieDataInDict:
-					if x=="name":
-						movieNameLen=len(movieDataInDict[x])
-						if movieNameLen>150:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-						else:
-							pass
-					elif x=="date":
-						result=checkDateFormat(movieDataInDict,x,False)
-						if result:
-							checkDate(movieDataInDict,x)
-						else:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="category":
-						categoryLen=len(movieDataInDict[x])
-						if categoryLen>150:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-						else:
-							pass
-					elif x=="runTime":
-						try:
-							int(movieDataInDict[x])
-						except:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="expiry":
-						result=checkDateFormat(movieDataInDict,x,True)
-						if result:
-							checkDate(movieDataInDict,x)
-						else:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="restriction":
-						try:
-							int(movieDataInDict[x]) 
-							condition = True
-						except:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					else:
-						condition=False
-						break
-			else:
-				self.send_response(200)
-				self.send_header('Content-Type','text/plain')
-				self.end_headers()
-				self.wfile.write(b'False')
+			condition = checkMovieData(self,movieDataInDict)
 			if condition:
 					insertShows(movieDataInDict)
-					self.send_response(200)
-					self.send_header('Content-Type','text/plain')
-					self.end_headers()
-					self.wfile.write(b'True')
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
 		elif urlRecieved == "/update":
 			condition=False
 			movieDataInDict=eval(decodedBody)
 			print(decodedBody)
-			if type(movieDataInDict) is dict:
-				for x in movieDataInDict:
-					if x=="name":
-						movieNameLen=len(movieDataInDict[x])
-						if movieNameLen>150:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-						else:
-							pass
-					elif x=="date":
-						result=checkDateFormat(movieDataInDict,x,False)
-						if result:
-							checkDate(movieDataInDict,x)
-						else:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="category":
-						categoryLen=len(movieDataInDict[x])
-						if categoryLen>150:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-						else:
-							pass
-					elif x=="runTime":
-						try:
-							int(movieDataInDict[x])
-						except:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="expiry":
-						result=checkDateFormat(movieDataInDict,x,True)
-						if result:
-							checkDate(movieDataInDict,x)
-						else:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="restriction":
-						try:
-							int(movieDataInDict[x]) 
-							condition = True
-						except:
-							self.send_response(200)
-							self.send_header('Content-Type','text/plain')
-							self.end_headers()
-							self.wfile.write(str(result).encode('utf-8'))
-							break
-					elif x=="id":
-						movieID= movieDataInDict[x]
-					else:
-						condition=False
-						break
-			else:
-				self.send_response(200)
-				self.send_header('Content-Type','text/plain')
-				self.end_headers()
-				self.wfile.write(b'False')
+			returnedValues = checkMovieData(self,movieDataInDict)
+			condition = returnedValues[0]
+			movieID = returnedValues[1]
 			if condition:
 					updateShows(movieDataInDict,movieID)
-					self.send_response(200)
-					self.send_header('Content-Type','text/plain')
-					self.end_headers()
-					self.wfile.write(b'True')
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
 			else:
-					self.send_response(200)
-					self.send_header('Content-Type','text/plain')
-					self.end_headers()
-					self.wfile.write(b'False')
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 		elif urlRecieved == "/loadImg":
 			ftp = FTP(ipaddress)
 			ftp.login(user,password)
 			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
-			self.send_response(200)
-			self.send_header('Content-Type', 'image/jpeg; utf-8')
-			self.end_headers()
-			self.wfile.write(fh.read())
+			sendResponse(self,200,'Content-Type','image/jpeg; utf-8',fh.read())
 		elif urlRecieved == "/loadVid":
 			ftp = FTP(ipaddress)
 			ftp.login(user,password)
 			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
-			self.send_response(200)
-			self.send_header('Content-Type', 'video/mp4; utf-8')
-			self.end_headers()
-			self.wfile.write(fh.read())
+			sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
 		elif urlRecieved == "/login":
 			decodedBody= re.sub('\%40','@',decodedBody)
 			formList=re.split("&",decodedBody)
@@ -354,90 +289,19 @@ class GetHandler(BaseHTTPRequestHandler):
 				if hash.verify_password(output[0][2],formList[1][1]):
 					global allowLogin
 					allowLogin=True
-					self.send_response(301)
-					self.send_header('Location','/searchMenu.html')
-					self.end_headers()
+					sendResponse(self,301,'Location','/searchMenu.html',b'')
 				else:
-					self.send_response(200)
-					self.end_headers()
-					self.wfile.write(b'invalid username or password,else')
+					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
 			except:
-				self.send_response(200)
-				self.end_headers()
-				self.wfile.write(b'invalid username or password,else')
+				sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
 		elif urlRecieved == "/createAccount":
 			invalidOption=True
 			decodedBody= re.sub('\%40','@',decodedBody)
-			print(decodedBody)
-			for x in ('firstName','lastName','dateOfBirth','user','pass','mail','package'):
-				arr = re.findall(x,decodedBody)
-				print(arr)
-				if len(arr) > 1:
-					if arr[0] != 'mail':
-						invalidOption=False
-						self.send_response(301)
-						self.send_header('Location','/newAccount.html')
-						self.end_headers()
-						break
-					else:
-						pass
-				if arr ==[]:
-					invalidOption=False
-					self.send_response(301)
-					self.send_header('Location','/newAccount.html')
-					self.end_headers()
-					break
-			if invalidOption:
-				formPos=[]
-				pos=0
-				for x in ('firstName','lastName','dateOfBirth','user','pass','mail','package'):
-					formPos.append(re.search(x,decodedBody))
-					formPos[pos]=formPos[pos].span()
-					pos+=1
-				print(formPos)
-				formDict={}
-				pos=1
-				for x in formPos:
-					if x[1]!= formPos[-1][1]:
-						if decodedBody[x[0]:x[1]] =='pass':
-							print([x[0],x[1]],x[1]+1,formPos[2][0]-1)
-							formDict[decodedBody[x[0]:x[1]]]=hash.hash_password(decodedBody[x[1]+1:formPos[pos][0]-1])
-						else:
-							print([x[0],x[1]],x[1]+1,formPos[2][0]-1)
-							formDict[decodedBody[x[0]:x[1]]]=decodedBody[x[1]+1:formPos[pos][0]-1]
-					else:
-						formDict[decodedBody[x[0]:x[1]]]=decodedBody[x[1]+1:]
-					pos+=1
-				for x in formDict:
-					print(x)
-					formDict[x]=re.sub('\+',' ',formDict[x])
-				
-				userCompare=SQLite.retrieveData('accounts','email,username','',formDict['mail'])
-				mailCompare=SQLite.retrieveData('accounts','email,username','',formDict['user'])
-				if mailCompare == [] and userCompare==[]:
-					try:
-						newID=SQLite.getMaxValue('accountID','accounts')[0][0]+1
-						SQLite.insertAccounts(newID,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
-					except:
-						SQLite.insertAccounts(1,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
-					self.send_response(301)
-					self.send_header('Location','/login.html')
-					self.end_headers()
-					userEmail= formDict['mail']
-					contentSent="Dear "+formDict['firstName']+""",
-This email is to confirm your account has been activated. 
+			creatNewAccount(self,decodedBody,invalidOption)
 
-Thank you""" 
-					# send_message(sender, to, subject, content)
-					Gmail.send_message('botbyali5@gmail.com', userEmail, 'Account Activation', contentSent)
-				else:
-					self.send_response(301)
-					self.send_header('Location','/newAccount.html')
-					self.end_headers()	
-			
+
 if __name__ == '__main__':
 	from http.server import HTTPServer
 	server= HTTPServer((ipaddress,1234), GetHandler)
 	print("Server Starting")
 	server.serve_forever()
-
