@@ -44,6 +44,7 @@ def createTable():
 				)""")
 
 def retrAcc():
+	connectToDataBase()
 	c.execute("SELECT * FROM accounts")
 	accountData = c.fetchall()
 	allAccounts=[]
@@ -51,25 +52,31 @@ def retrAcc():
 		allAccounts.append(classes.accounts(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]))
 	return allAccounts
 def retrShow():
+	connectToDataBase()
 	c.execute("SELECT * FROM tvShows")
 	showData = c.fetchall()
 	allShows=[]
-	for x in accountData:
+	for x in showData:
 		allShows.append(classes.tvShows(x[0],x[1],x[2],x[3],x[4],x[5],x[6]))
+	conn.close()
 	return allShows
 def retrUsers():
+	connectToDataBase()
 	c.execute("SELECT * FROM users")
-	showData = c.fetchall()
+	userData = c.fetchall()
 	allUsers=[]
-	for x in accountData:
+	for x in userData:
 		allUsers.append(classes.users(x[0],x[1],x[2],x[3]))
+	conn.close()
 	return allUsers
 def retrList():
+	connectToDataBase()
 	c.execute("SELECT * FROM myList")
-	showData = c.fetchall()
+	listData = c.fetchall()
 	allLists=[]
-	for x in accountData:
+	for x in listData:
 		allLists.append(classes.myList(x[0],x[1]))
+	conn.close()
 	return allLists
 def insertAccounts(ID, firstName, lastName, dateOfBirth, username, password, email, active, package):
 	connectToDataBase()

@@ -16,12 +16,11 @@ from dateFormat import checkDate, checkDateFormat
 sys.path.append('C:/Users/alial/Desktop/Programs/Gmail API')
 import Gmail
 import classes
+
 accountData = SQLite.retrAcc()
 showData = SQLite.retrShow()
-userData = SQLite.retrUser()
+userData = SQLite.retrUsers()
 listData = SQLite.retrList()
-print(accountData)
-
 
 #print("Username:")
 #user = input()
@@ -54,7 +53,7 @@ def updateShows(movieData,ID):
 	try:
 		if int(ID) >= 1:
 			SQLite.updateShows(ID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
-			global accountData
+			global showData
 			showData = SQLite.retrShow()
 	except:
 			SQLite.insertShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
@@ -83,7 +82,7 @@ def checkMovieData(self,movieDataInDict):
 	if type(movieDataInDict) is dict:
 		for x in movieDataInDict:
 			if x=="name":
-				movieNameLen=len(movieDataInDict[x])
+				movieNameLen=len(str(movieDataInDict[x]))
 				if movieNameLen>150:
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 					break
@@ -97,7 +96,7 @@ def checkMovieData(self,movieDataInDict):
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 					break
 			elif x=="category":
-				categoryLen=len(movieDataInDict[x])
+				categoryLen=len(str(movieDataInDict[x]))
 				if categoryLen>150:
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 					break
@@ -159,14 +158,14 @@ def creatNewAccount(self,decodedBody,invalidOption):
 		formDict={} 
 		pos=1
 		for slotNum in formPos:
-			slotField=formDict[decodedBody[slotNum[0]:slotNum[1]]]
+			slotField=decodedBody[slotNum[0]:slotNum[1]]
 			if slotNum[1]!= formPos[-1][1]:
 				if decodedBody[slotNum[0]:slotNum[1]] =='pass':
-					slotField=hash.hash_password(decodedBody[slotNum[1]+1:formPos[pos][0]-1])
+					formDict[slotField]=hash.hash_password(decodedBody[slotNum[1]+1:formPos[pos][0]-1])
 				else:
-					slotField=decodedBody[slotNum[1]+1:formPos[pos][0]-1]
+					formDict[slotField]=decodedBody[slotNum[1]+1:formPos[pos][0]-1]
 			else:
-				slotField=decodedBody[slotNum[1]+1:]
+				formDict[slotField]=decodedBody[slotNum[1]+1:]
 			pos+=1
 		for x in formDict:
 			formDict[x]=re.sub('\+',' ',formDict[x])
@@ -199,7 +198,7 @@ class GetHandler(BaseHTTPRequestHandler):
 		x =  parse.urlparse(self.path).path
 		urlRecieved=parse.urlparse(self.path).path
 		if(x in ("/addMovie.html", "/addMovie.js")):
-			openRequest(x,r"\addMovie")
+			openRequest(self,x,r"\addMovie")
 		elif urlRecieved in ("/searchMenu.html","/searchMenu.js"):
 			if allowLogin:
 				openRequest(self,x,r"\searchMovie")
@@ -223,82 +222,80 @@ class GetHandler(BaseHTTPRequestHandler):
 		else:
 			sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 
-
 	def do_POST(self):
-		print(self.request.getsockname())
-		urlRecieved=parse.urlparse(self.path).path
-		content_length = int(self.headers.get('content-length'))
-		body = self.rfile.read(content_length)
-		global decodedBody
-		decodedBody = body.decode("utf-8")
-		global ftp
-		ftp = FTP(ipaddress)
-		ftp.login(user,password)
-		if  decodedBody == 'loadDropDown':
-			loadDropDown()
-			sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
-		elif urlRecieved == "/getName":
-			if decodedBody !="":
-				showInfo=SQLite.retrieveData('tvShows',"*",decodedBody)
-				showInfo=re.sub('[()]','',str(showInfo))
-				showInfo=re.sub("[\'']",'',showInfo)
-				showInfo= showData[1:-1]
-				sendResponse(self,200,'Content-Type','application/json; utf-8',str(showInfo).encode('utf-8'))
-			else:
-				sendResponse(self,200,'Content-Type','application/json; utf-8',b'None')
-		
-		elif urlRecieved == "/send":
-			condition=False
-			movieDataInDict=eval(decodedBody)
-			condition = checkMovieData(self,movieDataInDict)
-			if condition:
-					insertShows(movieDataInDict)
-					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
-		elif urlRecieved == "/update":
-			condition=False
-			movieDataInDict=eval(decodedBody)
-			print(decodedBody)
-			returnedValues = checkMovieData(self,movieDataInDict)
-			condition = returnedValues[0]
-			movieID = returnedValues[1]
-			if condition:
-					updateShows(movieDataInDict,movieID)
-					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
-			else:
-					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
-		elif urlRecieved == "/loadImg":
+		if self.request.getsockname()[0] == ipaddress:
+			urlRecieved=parse.urlparse(self.path).path
+			content_length = int(self.headers.get('content-length'))
+			body = self.rfile.read(content_length)
+			global decodedBody
+			decodedBody = body.decode("utf-8")
+			global ftp
 			ftp = FTP(ipaddress)
 			ftp.login(user,password)
-			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
-			sendResponse(self,200,'Content-Type','image/jpeg; utf-8',fh.read())
-		elif urlRecieved == "/loadVid":
-			ftp = FTP(ipaddress)
-			ftp.login(user,password)
-			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
-			sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
-		elif urlRecieved == "/login":
-			decodedBody= re.sub('\%40','@',decodedBody)
-			formList=re.split("&",decodedBody)
-			pos=0
-			ftp.cwd('User Data')
-			for x in formList:
-				formList[pos]=re.split("=", formList[pos])
-				pos+=1
-			output=SQLite.retrieveData('accounts','username,email,password','',formList[0][1])
-			try:
-				if hash.verify_password(output[0][2],formList[1][1]):
-					global allowLogin
-					allowLogin=True
-					sendResponse(self,301,'Location','/searchMenu.html',b'')
+			if  decodedBody == 'loadDropDown':
+				loadDropDown()
+				sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
+			elif urlRecieved == "/getName":
+				if decodedBody !="":
+					showInfo=SQLite.retrieveData('tvShows',"*",decodedBody)
+					showInfo=re.sub('[()]','',str(showInfo))
+					showInfo=re.sub("[\'']",'',showInfo)
+					showInfo= showInfo[1:-1]
+					sendResponse(self,200,'Content-Type','application/json; utf-8',str(showInfo).encode('utf-8'))
 				else:
+					sendResponse(self,200,'Content-Type','application/json; utf-8',b'None')
+			
+			elif urlRecieved == "/send":
+				condition=False
+				movieDataInDict=eval(decodedBody)
+				condition = checkMovieData(self,movieDataInDict)
+				if condition:
+						insertShows(movieDataInDict)
+						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
+			elif urlRecieved == "/update":
+				condition=False
+				movieDataInDict=eval(decodedBody)
+				returnedValues = checkMovieData(self,movieDataInDict)
+				condition = returnedValues[0]
+				movieID = returnedValues[1]
+				if condition:
+						updateShows(movieDataInDict,movieID)
+						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
+				else:
+						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
+			elif urlRecieved == "/loadImg":
+				ftp = FTP(ipaddress)
+				ftp.login(user,password)
+				fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
+				sendResponse(self,200,'Content-Type','image/jpeg; utf-8',fh.read())
+			elif urlRecieved == "/loadVid":
+				ftp = FTP(ipaddress)
+				ftp.login(user,password)
+				fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
+				sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
+			elif urlRecieved == "/login":
+				decodedBody= re.sub('\%40','@',decodedBody)
+				formList=re.split("&",decodedBody)
+				pos=0
+				ftp.cwd('User Data')
+				for x in formList:
+					formList[pos]=re.split("=", formList[pos])
+					pos+=1
+				output=SQLite.retrieveData('accounts','username,email,password','',formList[0][1])
+				try:
+					if hash.verify_password(output[0][2],formList[1][1]):
+						global allowLogin
+						allowLogin=True
+						sendResponse(self,301,'Location','/searchMenu.html',b'')
+					else:
+						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
+				except:
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
-			except:
-				sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
-		elif urlRecieved == "/createAccount":
-			invalidOption=True
-			decodedBody= re.sub('\%40','@',decodedBody)
-			creatNewAccount(self,decodedBody,invalidOption)
-
+			elif urlRecieved == "/createAccount":
+				invalidOption=True
+				decodedBody= re.sub('\%40','@',decodedBody)
+				creatNewAccount(self,decodedBody,invalidOption)
+		
 
 if __name__ == '__main__':
 	from http.server import HTTPServer
