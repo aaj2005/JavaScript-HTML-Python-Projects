@@ -8,19 +8,23 @@ from email.message import EmailMessage
 import sys
 import hash
 from datetime import datetime
+from bs4 import BeautifulSoup
 global allowLogin
-allowLogin=False
+allowLogin=[False]
 sys.path.append('database')
 import SQLite
 from dateFormat import checkDate, checkDateFormat
 sys.path.append('C:/Users/alial/Desktop/Programs/Gmail API')
 import Gmail
 import classes
+import socket
+
 
 accountData = SQLite.retrAcc()
 showData = SQLite.retrShow()
 userData = SQLite.retrUsers()
 listData = SQLite.retrList()
+
 
 #print("Username:")
 #user = input()
@@ -28,7 +32,7 @@ listData = SQLite.retrList()
 
 user="Ali" #ftp user name
 password="aaj2005" #ftp password
-ipaddress='192.168.100.40' #ipv4 address
+ipaddress= socket.gethostbyname(socket.gethostname()) #ipv4 address
 
 def sendResponse(self,responseCode,keyword,mime,data):
 	self.send_response(responseCode)
@@ -157,8 +161,12 @@ def creatNewAccount(self,decodedBody,invalidOption):
 			pos+=1
 		formDict={} 
 		pos=1
+		#decoded body == firstname=x&lastname=y .......
+		#formPos == [(0,8)=slotNum]
+		#decodedBody[slotNum[0]:slotNum[1]]== decodedbody[0:8]
 		for slotNum in formPos:
 			slotField=decodedBody[slotNum[0]:slotNum[1]]
+
 			if slotNum[1]!= formPos[-1][1]:
 				if decodedBody[slotNum[0]:slotNum[1]] =='pass':
 					formDict[slotField]=hash.hash_password(decodedBody[slotNum[1]+1:formPos[pos][0]-1])
@@ -193,15 +201,16 @@ Thank you"""
 
 
 
+
 class GetHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		x =  parse.urlparse(self.path).path
 		urlRecieved=parse.urlparse(self.path).path
 		if(x in ("/addMovie.html", "/addMovie.js")):
 			openRequest(self,x,r"\addMovie")
-		elif urlRecieved in ("/searchMenu.html","/searchMenu.js"):
-			if allowLogin:
-				openRequest(self,x,r"\searchMovie")
+		elif urlRecieved in ("/newUser.html","/newUser.js"):
+			if allowLogin[0] and self.address_string() == allowLogin[2]:
+				openRequest(self,x,r"\createUser")
 			else:
 				sendResponse(self,301,'Location','/login.html',b'')
 		elif urlRecieved in ("/newAccount.html","/newAccount.js"):
@@ -219,6 +228,8 @@ class GetHandler(BaseHTTPRequestHandler):
 		elif urlRecieved == "/loadVid":
 			fh = request.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
 			sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
+		elif urlRecieved =="/getAccName":
+			sendResponse(self,200,'Content-Type','text/plain; utf-8',allowLogin[1].encode('utf-8'))
 		else:
 			sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 
@@ -282,11 +293,14 @@ class GetHandler(BaseHTTPRequestHandler):
 					formList[pos]=re.split("=", formList[pos])
 					pos+=1
 				output=SQLite.retrieveData('accounts','username,email,password','',formList[0][1])
+
 				try:
+					#output[0][0] == username, output[0][1] == email output[0][2]==password
+					#formList[0][1]== inputUser, formList[1][1]== inputPass
 					if hash.verify_password(output[0][2],formList[1][1]):
 						global allowLogin
-						allowLogin=True
-						sendResponse(self,301,'Location','/searchMenu.html',b'')
+						allowLogin=True, output[0][0], self.address_string()
+						sendResponse(self,301,'Location','/newUser.html',b'')
 					else:
 						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
 				except:
@@ -295,7 +309,7 @@ class GetHandler(BaseHTTPRequestHandler):
 				invalidOption=True
 				decodedBody= re.sub('\%40','@',decodedBody)
 				creatNewAccount(self,decodedBody,invalidOption)
-		
+
 
 if __name__ == '__main__':
 	from http.server import HTTPServer

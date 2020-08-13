@@ -14,8 +14,8 @@ def createTable():
 				firstName nvarchar(25),
 				lastName nvarchar(30),
 				dateOfBirth date,
-				username nvarchar(20),
-				password nvarchar(20),
+				username nvarchar(60),
+				password nvarchar(60),
 				email nvarchar(320),
 				active BOOLEAN,
 				package nvarchar(300)
@@ -144,7 +144,6 @@ def delTable():
 
 
 connectToDataBase()
-# delTable()
 
 # createTable()
 # insertAccounts(1,"Ali","AlJishi","2005-04-25", 'aaj2005', 'ali2005', 'botbyali5@gmail.com', 'True', 'UHD')
