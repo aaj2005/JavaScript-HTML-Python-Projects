@@ -5,6 +5,6 @@ async function getAccName(){
 	
 	const response=await fetch('/getAccName',{method : 'GET', headers:{'Content-Type':'text/plain'}});
 	let x =await response.text()
-	document.getElementById('nameOfAccount').innerHTML = x
+	document.getElementById('nameOfAccount').innerHTML = "Welcome "+x
 }
 getAccName()

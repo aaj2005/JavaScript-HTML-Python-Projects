@@ -47,9 +47,9 @@ def retrAcc():
 	connectToDataBase()
 	c.execute("SELECT * FROM accounts")
 	accountData = c.fetchall()
-	allAccounts=[]
+	allAccounts={}
 	for x in accountData:
-		allAccounts.append(classes.accounts(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]))
+		allAccounts[x[4]]=classes.accounts(x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8])
 	return allAccounts
 def retrShow():
 	connectToDataBase()

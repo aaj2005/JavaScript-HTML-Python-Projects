@@ -43,6 +43,7 @@ class tvShows:
 	def __str__(self):
 		return "{}: {}".format(self.name,self.showId)
 
+
 class myList:
 	def __init__(self,showId,userId):
 		self.showId=showId
