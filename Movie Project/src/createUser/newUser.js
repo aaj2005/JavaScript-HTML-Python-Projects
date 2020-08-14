@@ -1,5 +1,5 @@
 'use strict'
-document.getElementById('add').addEventListener('click',function(){document.getElementById("overlay").style.display="flex"})
+//document.getElementById('add').addEventListener('click',function(){document.getElementById("overlay").style.display="flex"})
 
 async function getAccName(){
 	

@@ -9,7 +9,6 @@ from email.message import EmailMessage
 import sys
 import hash
 from datetime import datetime
-from bs4 import BeautifulSoup
 global allowLogin
 sys.path.append('database')
 import SQLite
@@ -28,7 +27,6 @@ userData = SQLite.retrUsers()
 listData = SQLite.retrList()
 for accountClass in accountData:
 	allowLogin[accountClass]=[False,'','']
-print(allowLogin)
 
 #print("Username:")
 #user = input()
@@ -77,7 +75,7 @@ def loadDropDown():
 		listInStr= maxID[0][0]
 	except:
 		listInStr="No Data Stored"
-def openRequest(self,x,url):
+def openRequest(self,x,url,body=None):
 	mimeType= os.path.splitext(x)
 	dictionary={
 		"html":"text/html",
@@ -86,9 +84,12 @@ def openRequest(self,x,url):
 	self.send_response(200)
 	self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 	self.end_headers()
-	path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src"+ url + x
-	with open(path,"r",encoding="utf-8") as f:
-		self.wfile.write(f.read().encode("utf-8"))
+	if body is None:
+		path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src"+ url + x
+		with open(path,"r",encoding="utf-8") as f:
+			self.wfile.write(f.read().encode("utf-8"))
+	else:
+		self.wfile.write(body.encode("utf-8"))
 def checkMovieData(self,movieDataInDict):
 	if type(movieDataInDict) is dict:
 		for x in movieDataInDict:
@@ -224,7 +225,6 @@ def login(self,decodedBody):
 			global httpRequest
 			httpRequest=http.client.HTTPConnection(ipaddress,'1234')
 			httpRequest.request('GET','/username',output[0][0])
-			print('post http')
 			certainSelf=self
 			return True
 		else:
@@ -250,10 +250,9 @@ class GetHandler(BaseHTTPRequestHandler):
 				sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 
 		elif urlRecieved in ("/newUser.html","/newUser.js"):
-			print('there')
 			try:
 				if allowLogin[body][0] and self.address_string() == allowLogin[body][2]:
-					openRequest(self,x,r"\createUser")
+					openRequest(self,x,accountData[allowLogin[body][1]].userDoc)
 				else:
 					sendResponse(self,301,'Location','/login.html',b'')
 			except:
