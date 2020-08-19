@@ -1,0 +1,14 @@
+{% extends "template.html" %}
+{% block content %}
+
+	{% for item in storage %}
+		<form method="POST" onsubmit="">
+			
+			<input name="{{item}}"style="border:none" value="{{ item }}"><input type="submit">+</input></input>
+			
+			
+		</form>
+	{% endfor %}
+	<h1>{{basket}}</h1>
+
+{% endblock %}

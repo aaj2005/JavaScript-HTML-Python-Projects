@@ -1,0 +1,9 @@
+{% extends "template.html" %}
+{% block content %}
+	<h1>Shopping Basket:</h1>
+	{% for items in basket %}
+		{% if basket[items] != 0 %}
+			<h1>{{items}}:{{basket[items]}}</h1>
+		{% endif %}
+	{% endfor %}
+{% endblock %}
