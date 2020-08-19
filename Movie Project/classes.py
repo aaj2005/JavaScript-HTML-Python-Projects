@@ -12,23 +12,18 @@ class accounts:
 		self.status=active
 		self.package=package
 		self.accountArr=[self.Id,self.first,self.last,self.date,self.user,self.password,self.email,self.status,self.package]
-		with open('src/createUser/newUser.html','r') as fp:
-			self.userDoc=(BeautifulSoup(fp.read(),'html5lib'))
-			self.userDoc.find('div',id='nameOfAccount').string = self.user
 	def __repr__(self):
 		return 'accounuts'+str(tuple(self.accountArr))
 	def __str__(self):
 		return "{} {}: {}".format(self.first,self.last,self.Id)
-	def newUserHtmlPage(self):
-		pass
 
 class users:
-	def __init__(self,userId,profileName,restriction):
+	def __init__(self,userId,profileName,accountId,restriction):
 		self.userId=userId
 		self.profName=profileName
 		self.accountId=accountId
 		self.restriction=restriction
-		self.userArr=[self.userId,self.profName,self.last,self.accountId,self.restriction]
+		self.userArr=[self.userId,self.profName,self.accountId,self.restriction]
 	def __repr__(self):
 		return 'users'+str(tuple(self.userArr))
 	def __str__(self):

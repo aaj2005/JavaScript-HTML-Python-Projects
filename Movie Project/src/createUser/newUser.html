@@ -6,7 +6,7 @@
 /*html{
 	background-color:#bdc9de;
 }*/
-#add{
+#div1{
 	position:absolute;
 	top: 20%;
 	left:40%;
@@ -36,12 +36,19 @@
 </head>
 
 <body>
-<div id='overlay'></div>
+<div id='overlay'>
+  <form method="POST" action="/createUser">
+    <label>Name</label><input name="Name"></input>
+    <label>Restriction:</label><input name="Restriction"></input>
+    <input type="text" id="accountname"name="accountname" style="display: none;"readonly></input>
+    <input type="Submit"></input>
+  </form>
+</div>
 
 <div id="nameOfAccount"></div>
-
+<div id="div1">
 <button id="add">+</button>
-
+</div>
 
 <script src="newUser.js"></script>
 

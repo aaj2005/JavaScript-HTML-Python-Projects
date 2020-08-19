@@ -9,22 +9,23 @@ def connectToDataBase():
 	global c
 	c = conn.cursor()
 def createTable():
-	c.execute("""CREATE Table accounts (
-				accountID INTEGER PRIMARY KEY, 
-				firstName nvarchar(25),
-				lastName nvarchar(30),
-				dateOfBirth date,
-				username nvarchar(60),
-				password nvarchar(60),
-				email nvarchar(320),
-				active BOOLEAN,
-				package nvarchar(300)
-				)""")
+	# c.execute("""CREATE Table accounts (
+	# 			accountID INTEGER PRIMARY KEY, 
+	# 			firstName nvarchar(25),
+	# 			lastName nvarchar(30),
+	# 			dateOfBirth date,
+	# 			username nvarchar(60),
+	# 			password nvarchar(60),
+	# 			email nvarchar(320),
+	# 			active BOOLEAN,
+	# 			package nvarchar(300)
+	# 			)""")
 	c.execute("""CREATE Table users (
-				userID INTEGER NOT NULL ,
+				userID INTEGER NOT NULL,
 				profileName nvarchar(30),
-				accountID int PRIMARY KEY,
+				accountID int,
 				restriction nvarchar(10),
+				userOrder int PRIMARY KEY,
 				FOREIGN KEY(accountID) REFERENCES accounts(accountID)
 				)""")
 	c.execute("""CREATE Table myList (
@@ -62,11 +63,11 @@ def retrShow():
 	return allShows
 def retrUsers():
 	connectToDataBase()
-	c.execute("SELECT * FROM users")
+	c.execute("SELECT userID, profileName, accountID, restriction FROM users")
 	userData = c.fetchall()
-	allUsers=[]
+	allUsers={}
 	for x in userData:
-		allUsers.append(classes.users(x[0],x[1],x[2],x[3]))
+		allUsers[x[1]+str(x[2])]=classes.users(x[0],x[1],x[2],x[3])
 	conn.close()
 	return allUsers
 def retrList():
@@ -88,7 +89,8 @@ def insertAccounts(ID, firstName, lastName, dateOfBirth, username, password, ema
 def insertUsers(userID, profileName, accountID, restriction):
 	connectToDataBase()
 	with conn:
-		c.execute("INSERT INTO users VALUES (:userID, :profileName, :accountID, :restriction)",
+		print(userID)
+		c.execute("INSERT INTO users(userID,profileName,accountID,restriction) VALUES (:userID, :profileName, :accountID, :restriction)",
 		{'userID':userID, 'profileName':profileName, 'accountID':accountID, 'restriction':restriction})
 	conn.close()
 
@@ -135,19 +137,22 @@ def getMaxValue(column,table):
 	connectToDataBase()
 	c.execute("SELECT MAX("+column+") FROM "+table)
 	return c.fetchall()
-
+def getMaxValueUsers(column,table,accountID):
+	connectToDataBase()
+	c.execute("SELECT MAX("+column+") FROM "+table+" WHERE accountID="+str(accountID))
+	return c.fetchall()
 def delTable():
-	c.execute("DROP TABLE accounts")
+	# c.execute("DROP TABLE accounts")
 	c.execute("DROP TABLE users")
-	c.execute("DROP TABLE myList")
-	c.execute("DROP TABLE tvShows")
+	# c.execute("DROP TABLE myList")
+	# c.execute("DROP TABLE tvShows")
 
 
 connectToDataBase()
-
+# delTable()
 # createTable()
 # insertAccounts(1,"Ali","AlJishi","2005-04-25", 'aaj2005', 'ali2005', 'botbyali5@gmail.com', 'True', 'UHD')
 # insertUsers(4, 'Salman', 2, '15')
 
-# c.execute("DELETE FROM users WHERE accountID=2 ")
+# c.execute("DELETE FROM users where userID=1")
 conn.commit()

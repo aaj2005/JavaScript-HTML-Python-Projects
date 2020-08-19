@@ -45,16 +45,12 @@ function on() {
 		imgRequest.onload= function(){		
 			imageTag.src= "/loadImg"
 			overlay.style.display = "flex";
-			videoTag.style.display = "none";
 			imageTag.style.display= "flex"
 			imageTag.addEventListener("click",function(){
-				imgRequest.open("POST", "/loadVid", true)
 				imgRequest.setRequestHeader("Content-type", "text/strings; utf-8")
 				imgRequest.send(objectList[target])
 				imgRequest.onload= function(){
 					imageTag.style.display= "none"
-					videoTag.style.display= "flex"
-					videoTag.src="/loadVid"
 
 
 				}
@@ -62,25 +58,11 @@ function on() {
 		}
 	}
 }
-let videoStatus = false
-videoTag.addEventListener("click",function(){
-	if(videoStatus==false || videoTag.paused){
-		videoTag.play()
-		videoStatus= true
-		console.log(videoTag.seekable.end(0))
-	}else{
-		videoTag.pause()
-		videoStatus = false
-		
-	}
-	
-	})
 	
 document.addEventListener("keydown",function(){
 	if(event.key=="Escape"&& document.getElementById("overlay").style.display == "flex"){
 		document.getElementById("overlay").style.display = "none";
 		document.getElementById("overlayImg").style.display= "none"
-		document.getElementById("video").src=""
 	}
 })
 
