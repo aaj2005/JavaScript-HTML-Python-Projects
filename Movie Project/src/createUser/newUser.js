@@ -21,14 +21,27 @@ async function getUsers(){
 			let div1=document.getElementById('div1')
 			let button=document.createElement('button')
 			button.setAttribute("id",usersList[user])
+			button.setAttribute("onclick", 'searchMenu("'+usersList[user]+'")')
 			div1.appendChild(button)
 			document.getElementById(usersList[user]).innerHTML=usersList[user]
 		}
 	}
 }
+async function searchMenu(id){
+	let request = new XMLHttpRequest()
+	request.open("POST", "/searchMenu", true)
+	request.setRequestHeader("Content-type", "text/plain")
+	request.send(id)
+	window.location.replace("/searchMenu.html")
 
+}
 document.addEventListener("keydown",function(){
 	if(event.key=="Escape"&& document.getElementById("overlay").style.display == "flex"){
 		document.getElementById("overlay").style.display = "none";
 	}
 })
+
+async function logout(){
+	let logout=await fetch('/logout',{method : 'GET', headers:{'Content-Type':'application/json'}});
+	window.location.replace("/login.html")
+}

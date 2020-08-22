@@ -15,10 +15,10 @@ def insertShows(movieData,showData):
 		newID=SQLite.getMaxValue("showID", "tvShows")[0][0]+1
 		if newID >= 1:
 			SQLite.insertShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
-			showData.append(classes.tvShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
+			showData[movieData['name']](classes.tvShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 	except:
 			SQLite.insertShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
-			showData.append(classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
+			showData[movieData['name']](classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 	return showData
 def updateShows(movieData,ID):
 	try:
@@ -31,11 +31,15 @@ def updateShows(movieData,ID):
 			showData.append(classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 
 def checkMovieData(self,movieDataInDict):
+	condition=False
 	if type(movieDataInDict) is dict:
 		for x in movieDataInDict:
 			if x=="name":
+				checkMovie=SQLite.retrieveData('tvShows','name',movieName=movieDataInDict[x])[0][0]
 				movieNameLen=len(str(movieDataInDict[x]))
-				if movieNameLen>150:
+				print(checkMovie)
+				if movieNameLen>150 or checkMovie!=None:
+					print('wrong name')
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 					break
 				else:
@@ -91,13 +95,13 @@ def createNewAccount(self,decodedBody,invalidOption,accountData):
 		if len(arr) > 1:
 			if arr[0] != 'mail':
 				invalidOption=False
-				sendResponse(self,301,'Location','/newAccount.html',b'')
+				sendResponse(self,302,'Location','/newAccount.html',b'')
 				break
 			else:
 				pass
 		if arr ==[]:
 			invalidOption=False
-			sendResponse(self,301,'Location','/newAccount.html',b'')
+			sendResponse(self,302,'Location','/newAccount.html',b'')
 			break
 	if invalidOption:
 		formPos=[]
@@ -136,7 +140,7 @@ def createNewAccount(self,decodedBody,invalidOption,accountData):
 			except:
 				SQLite.insertAccounts(1,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
 				accountData[formDict['user']]=classes.accounts(1,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
-			sendResponse(self,301,'Location','/login.html',b'')
+			sendResponse(self,302,'Location','/login.html',b'')
 			userEmail= formDict['mail']
 			contentSent="Dear "+formDict['firstName']+""",
 This email is to confirm your account has been activated. 
@@ -146,7 +150,7 @@ Thank you"""
 			Gmail.send_message('botbyali5@gmail.com', userEmail, 'Account Activation', contentSent)
 			return accountData
 		else:
-			sendResponse(self,301,'Location','/newAccount.html',b'')
+			sendResponse(self,302,'Location','/newAccount.html',b'')
 
 def login(self,decodedBody,allowLogin):
 	decodedBody= re.sub('\%40','@',decodedBody)
@@ -155,7 +159,7 @@ def login(self,decodedBody,allowLogin):
 	for x in formList:
 		formList[pos]=re.split("=", formList[pos])
 		pos+=1
-	output=SQLite.retrieveData('accounts','username,email,password','',formList[0][1])
+	output=SQLite.retrieveData('accounts','username,email,password',email=formList[0][1])
 
 	try:
 		#output[0][0] == username, output[0][1] == email output[0][2]==password
@@ -163,7 +167,6 @@ def login(self,decodedBody,allowLogin):
 		if hashingPasswords.verify_password(output[0][2],formList[1][1]):
 			allowLogin[output[0][0]]= [True,output[0][0]]
 			body = output[0][0]
-			print(True)
 			return body, allowLogin
 		else:
 			sendResponse(self,200,'Content-Type','text/plain; utf-8',b'invalid username or password,else')
@@ -174,19 +177,25 @@ def login(self,decodedBody,allowLogin):
 def createUser(self,formData,userData):
 	formData=formData.split('&')
 	createUserPos=0
-	for element in range(len(formData)): 
+	for element in range(len(formData)):
 		formData[element]=formData[element].split('=')
 	profileName=formData[0][1]
 	restriction=formData[1][1]
 	accountName=formData[2][1]
 	accountID=SQLite.retrieveData('accounts','accountID',email=accountName)[0][0]
 	maxUserID= SQLite.getMaxValueUsers('userID','users',accountID)[0][0]
+	try:
+		nothing=userData[profileName+str(accountID)]
+		return userData
+	except:
+		pass
 	if maxUserID is not None:
 		print(type(maxUserID))
 		SQLite.insertUsers(maxUserID+1,profileName,accountID,restriction)
+		userData[profileName+str(accountID)]=classes.users(maxUserID+1,profileName,accountID,restriction)
 	else:
 		SQLite.insertUsers(1,profileName,accountID,restriction)
-	userData[profileName+"1"]=classes.users(1,profileName,accountID,restriction)
+		userData[profileName+"1"]=classes.users(1,profileName,accountID,restriction)
 	return userData
 def getUsers(self, userData,accountName):
 	userArr=[]
@@ -195,3 +204,11 @@ def getUsers(self, userData,accountName):
 		if accountID == int(user[-1]):
 			userArr.append(userData[user].profName)
 	return userArr
+def addToList(self,decodedBody,accountData,userData,showData):
+	accId=str(accountData[decodedBody[1]].Id)
+	userId=userData[decodedBody[2]+accId].userId
+	showId=showData[decodedBody[0]].showId
+	SQLite.addToList(showId,accId,userId)
+	listData=SQLite.retrList()
+	showCombo= SQLite.getMaxValue('showUserCombination','myList')[0][0]
+	return listData,showCombo

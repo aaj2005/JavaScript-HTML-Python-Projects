@@ -23,6 +23,7 @@ class users:
 		self.profName=profileName
 		self.accountId=accountId
 		self.restriction=restriction
+		self.userAccountCombo=str(accountId)+':'+str(userId)
 		self.userArr=[self.userId,self.profName,self.accountId,self.restriction]
 	def __repr__(self):
 		return 'users'+str(tuple(self.userArr))
@@ -32,14 +33,14 @@ class users:
 
 class tvShows:
 	def __init__(self,showID,name,releaseDate,category,runTime,expiry,restriction):
-		self.showID=showID
+		self.showId=showID
 		self.name=name
 		self.releaseDate=releaseDate
 		self.category=category
 		self.runTime=runTime
 		self.expiry=expiry
 		self.restriction=restriction
-		self.showArr=[self.showID,self.name,self.releaseDate,self.category,self.runTime,self.expiry,self.restriction]
+		self.showArr=[self.showId,self.name,self.releaseDate,self.category,self.runTime,self.expiry,self.restriction]
 	def __repr__(self):
 		return 'tvShows'+str(tuple(self.showArr))
 	def __str__(self):
@@ -47,7 +48,8 @@ class tvShows:
 
 
 class myList:
-	def __init__(self,showId,userId):
+	def __init__(self,showId,userAccountCombo,showUserCombo):
 		self.showId=showId
-		self.userId=userId
+		self.userAccountCombo=userAccountCombo
+		self.showUserCombo=showUserCombo
 

@@ -4,33 +4,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Search for a Movie</title>
 <style>
+#myListText{
+  position: fixed;
+  right: 30%;
+  top: 8px;
+}
+.searchBar {
 
-#mySearch {
   width: 50%;
   font-size: 18px;
   padding: 11px;
+  margin-left:0%;
   border: 1px solid #ddd;
 }
-
-
-#myMenu {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+#listDiv {
+  right: 5%;
+  position: fixed;
+  top: 83.2px;
+  width: 30%;
+  font-size: 18px;
+  padding: 11px;
+  border: none;
 }
 
 
-#myMenu li a {
+.myMenu {
+  width:50%;
+  list-style-type: none;
+  padding: 0;
+  margin: 0px ;
+  display: block;
+
+}
+
+
+.myMenu li a {
+  width:40%;
   padding: 12px;
   text-decoration: none;
   color: black;
-  display: block
+  display: inline-block;
 }
 
-#myMenu li a:hover {
-  width:50%;
+.myMenu li a:hover {
+  padding: 12px;
   background-color: #eee;
 
+}
+.left{
+  float: left;
+}
+.right{
+  float: right;
 }
 #overlay {
   position: fixed; /* Sit on top of the page content */
@@ -49,16 +74,33 @@
 }
 
 </style>
+
 </head>
 <body>
+<button onclick="logout()">logout</button>
 <div id="overlay">
 <img id="overlayImg" width="40%" height="500">
 </div>
-<input type="text" id="mySearch" onkeyup="myFunction()" placeholder="Search.." title="Type in a category">
+<div id="profName">
+  <h1 id='h1Prof'></h1>
+</div>
 
-<ul id="myMenu">
+<div id="search">
+<input type="text" class="searchBar"id="mySearch" onkeyup="myFunction('myMenu',this.id)" placeholder="Search.." title="Type in a category">
+</input>
+<ul id="myMenu" class="myMenu">
 
 </ul>
+</div>
+<div id='listDiv'>
+<h1 id="myListText">My List</h1>
+<input type="text" class="searchBar" id="myList" onkeyup="myFunction('myMenuList',this.id)" placeholder="Search My List" title="Type in a category"></input>
+
+<ul id="myMenuList" class="myMenu">
+<br>
+</ul>
+</div>
 <script src="searchMenu.js"></script>
+
 </body>
 </html>

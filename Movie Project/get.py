@@ -6,10 +6,8 @@ def sendResponse(self,responseCode,keyword,mime,data):
 	self.send_response(responseCode)
 	self.send_header(keyword, mime)
 	self.end_headers()
-	try:
-		self.wfile.write(data)
-	except:
-		pass
+	self.wfile.write(data)
+	
 def loadDropDown():
 	maxID=SQLite.getMaxValue("showID", "tvShows")
 	listInStr = ""
@@ -18,18 +16,18 @@ def loadDropDown():
 	except:
 		listInStr="No Data Stored"
 	return listInStr
-def openRequest(self,x,url,body=None):
+def openRequest(self,x,url,body=None,responseCode=200):
 	mimeType= os.path.splitext(x)
 	dictionary={
 		"html":"text/html",
 		"js":"text/javascript"
 	}
-	self.send_response(200)
+	print(x)
+	self.send_response(responseCode)
 	self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 	self.end_headers()
 	if body is None:
 		path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src"+ url + x
-		print(path)
 		with open(path,"r",encoding="utf-8") as f:
 			self.wfile.write(f.read().encode("utf-8"))
 	else:

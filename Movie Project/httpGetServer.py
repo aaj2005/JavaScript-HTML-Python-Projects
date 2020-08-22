@@ -18,15 +18,12 @@ user="Ali" #ftp user name
 password="aaj2005" #ftp password
 ipaddress= socket.gethostbyname(socket.gethostname()) #ipv4 address
 
-
-
+global username
 
 
 class GetHandler(BaseHTTPRequestHandler):
-	global allowLogin
+	username=""
 	allowLogin={}
-
-	
 	accountData = SQLite.retrAcc()
 	showData = SQLite.retrShow()
 	userData = SQLite.retrUsers()
@@ -36,25 +33,38 @@ class GetHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		x =  parse.urlparse(self.path).path
 		urlRecieved=parse.urlparse(self.path).path
-		if(x in ("/addMovie.html", "/addMovie.js")):
+		if x in ("/addMovie.html", "/addMovie.js"):
 			openRequest(self,x,r"\addMovie")
 
 		elif urlRecieved in ("/newUser.html","/newUser.js"):
 			try:
-				if acceptLogin[username][0]:
+				if GetHandler.allowLogin[GetHandler.username][0]:
 					openRequest(self,x,r'\createUser')
-				else:
-					sendResponse(self,301,'Location','/login.html',b'')
+					return
 			except:
-				sendResponse(self,301,'Location','/login.html',b'')
+				sendResponse(self,302,'Location','/login.html',b'')
+		elif urlRecieved in ('/searchMenu.html','/searchMenu.js'):
+			try:
+				
+				if GetHandler.allowLogin[GetHandler.username][0]:
+					openRequest(self,x,r'\searchMovie')
+				else:
+					sendResponse(self,302,'Location','/login.html',b'')
+			except:
+				sendResponse(self,302,'Location','/login.html',b'')
 		elif urlRecieved in ("/newAccount.html","/newAccount.js"):
 			openRequest(self,x,r"\createAccount")
-		elif urlRecieved in ("/newUser.html","/newUser.js"):
-			openRequest(self,x,r"\createUser")
 		elif urlRecieved in ("/login.html","/Login.js"):
-			openRequest(self,x,r"\login")
+			openLoginPage=True
+			for accounts in GetHandler.allowLogin:
+				if GetHandler.allowLogin[accounts][0]== True:
+					GetHandler.username=accounts
+					openLoginPage=False
+					sendResponse(self,302,'Location','/newUser.html',b'')
+			if openLoginPage:
+				openRequest(self,x,r"\login")
 		elif urlRecieved == "/getArrayCount":
-			loadDropDown()
+			listInStr=loadDropDown()
 			sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
 		elif urlRecieved == "/loadImg":
 			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
@@ -63,7 +73,21 @@ class GetHandler(BaseHTTPRequestHandler):
 			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Video/'+decodedBody+'.mp4')
 			sendResponse(self,200,'Content-Type','video/mp4; utf-8',fh.read())
 		elif urlRecieved =="/getAccName":
-			sendResponse(self,200,'Content-Type','text/plain; utf-8',acceptLogin[username][1].encode('utf-8'))
+			sendResponse(self,200,'Content-Type','text/plain; utf-8',GetHandler.allowLogin[GetHandler.username][1].encode('utf-8'))
+		elif urlRecieved == '/getProfName':
+			sendResponse(self,200,'Content-Type','text/plain; utf-8',profname.encode('utf-8'))
+		elif urlRecieved =='/getMovieName':
+			showListWithId=''
+			for showName in GetHandler.showData:
+				showListWithId+=','+showName+':'+str(GetHandler.showData[showName].showId)
+			showListWithId= showListWithId[1:]
+			sendResponse(self,200,'Content-Type','text/plain; utf-8',showListWithId.encode('utf-8'))
+		elif urlRecieved == '/logout':
+			for accounts in GetHandler.allowLogin:
+				if GetHandler.allowLogin[accounts][0] == True:
+					GetHandler.allowLogin[accounts][0]=False
+			print(GetHandler.allowLogin)
+			sendResponse(self,200,'Location','/login.html',b'')
 		else:
 			sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 			
@@ -80,9 +104,9 @@ class GetHandler(BaseHTTPRequestHandler):
 			if  decodedBody == 'loadDropDown':
 				listInStr=loadDropDown()
 				sendResponse(self,200,'Content-Type','text/strings; utf-8',str(listInStr).encode("utf-8"))
-			elif urlRecieved == "/getName":
+			elif urlRecieved == "/getShowData":
 				if decodedBody !="":
-					showInfo=SQLite.retrieveData('tvShows',"*",decodedBody)
+					showInfo=SQLite.retrieveData('tvShows',"*",showId=decodedBody)
 					showInfo=re.sub('[()]','',str(showInfo))
 					showInfo=re.sub("[\'']",'',showInfo)
 					showInfo= showInfo[1:-1]
@@ -91,11 +115,11 @@ class GetHandler(BaseHTTPRequestHandler):
 					sendResponse(self,200,'Content-Type','application/json; utf-8',b'None')
 			
 			elif urlRecieved == "/send":
-				condition=False
+
 				movieDataInDict=eval(decodedBody)
 				condition = checkMovieData(self,movieDataInDict)
 				if condition:
-						self.showData=insertShows(movieDataInDict,self.showData)
+						GetHandler.showData=insertShows(movieDataInDict,GetHandler.showData)
 						sendResponse(self,200,'Content-Type','text/plain; utf-8',b'True')
 			elif urlRecieved == "/update":
 				condition=False
@@ -114,29 +138,59 @@ class GetHandler(BaseHTTPRequestHandler):
 				fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Movie Poster/'+decodedBody+'.jpg')
 				sendResponse(self,200,'Content-Type','image/jpeg; utf-8',fh.read())
 			elif urlRecieved == "/login":
-				returnedData=login(self,decodedBody,allowLogin)
+				returnedData=login(self,decodedBody,GetHandler.allowLogin)
 				if returnedData is not None:
-					global username
-					username=returnedData[0]
-					global acceptLogin
-					acceptLogin=returnedData[1]
-				sendResponse(self,301,'Location','/newUser.html',b'')
+					GetHandler.username=returnedData[0]
+					GetHandler.allowLogin=returnedData[1]
+				sendResponse(self,302,'Location','/newUser.html',b'')
 			elif urlRecieved == "/createAccount":
 				invalidOption=True
 				decodedBody= re.sub('\%40','@',decodedBody)
-				accountDataUpdated=createNewAccount(self,decodedBody,invalidOption,self.accountData)
+				accountDataUpdated=createNewAccount(self,decodedBody,invalidOption,GetHandler.accountData)
 				accountData=accountDataUpdated
 			elif urlRecieved == "/createUser":
-				self.userData=createUser(self,decodedBody,self.userData)
-				sendResponse(self,301,'Location','/newUser.html',b'')
+				GetHandler.userData=createUser(self,decodedBody,GetHandler.userData)
+				sendResponse(self,302,'Location','/newUser.html',b'')
 			elif urlRecieved == "/getUsers":
-				userArr=getUsers(self,self.userData,decodedBody)
+				userArr=getUsers(self,GetHandler.userData,decodedBody)
 				userList= ""
 				for name in userArr:
 					userList= userList +','+name
 				userList=userList[1:]
 				sendResponse(self,200,'Content-Type','text/plain',userList.encode('utf-8'))
-
+			elif urlRecieved == '/searchMenu':
+				global profname
+				profname= decodedBody
+				sendResponse(self,200,'Content-Type','text/plain',b'')
+			elif urlRecieved == '/addToList':
+				decodedBody=eval(decodedBody)
+				showId=GetHandler.showData[decodedBody[0]].showId
+				accountId= GetHandler.accountData[decodedBody[1]].Id
+				userId= GetHandler.userData[decodedBody[2]+str(accountId)].userId
+				showName=SQLite.retrieveData('tvShows','name',showId=showId)[0][0]
+				try:
+					GetHandler.listData[decodedBody[1]+':'+decodedBody[2]+':'+str(showId)]
+					SQLite.removeShowFromList(showId,str(accountId)+':'+str(userId))
+					GetHandler.listData=SQLite.retrList()
+					sendResponse(self,200,'Content-Type','text/plain',showName.encode('utf-8'))
+				except KeyError as e:
+					returnedListData=addToList(self,decodedBody,GetHandler.accountData,GetHandler.userData,GetHandler.showData)
+					GetHandler.listData=returnedListData[0]
+					showCombo=returnedListData[1]
+					sendResponse(self,200,'Content-Type','text/plain',GetHandler.showData[decodedBody[0]].name.encode('utf-8'))
+			elif urlRecieved =='/getList':
+				decodedBody=decodedBody.split(',')
+				accountName=decodedBody[0]
+				profileName=decodedBody[1]
+				showList=''
+				for accountUserID in GetHandler.listData:
+					accountUserIDSplit=accountUserID.split(':')
+					if accountName == accountUserIDSplit[0] and profileName == accountUserIDSplit[1]:
+						showId=GetHandler.listData[accountUserID].showId
+						showName=SQLite.retrieveData('tvShows','name',showId=showId)[0][0]
+						showList += ','+showName
+				showList=showList[1:]
+				sendResponse(self,200,'Content-Type','text/plain; utf-8',showList.encode('utf-8'))
 if __name__ == '__main__':
 	from http.server import HTTPServer
 	server= HTTPServer((ipaddress,1234), GetHandler)
