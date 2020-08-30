@@ -1,0 +1,98 @@
+html{
+  display: flex;
+  height:100vh;
+  background-image: url(/loginImage.jpg);
+  opacity: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+body{
+  margin:0px 0px 0px 0px; 
+  width:100%;
+  height: auto;
+
+}
+
+
+.formElements{
+ 
+  margin-top: 5%;
+  margin-left: 23%;
+  height:auto;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  width:55%;
+  opacity: 90%;
+  background-color: #e3e3e3;
+}
+.formElements form{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: space-between;
+  height: 100%;
+  width:100%;
+}
+
+.title{
+  text-align: center;
+  color:rgba(174 0 0 / 80%);
+  font-size:48px;
+  top:22%;
+  left:40%;
+}
+.formElements div, form{
+  margin-left: 10px;
+  font-size:30px;
+  color:rgba(174 0 0 / 80%);
+}
+.formElements input,select,a{
+  padding: 10px 10px 10px 10px;
+  width:auto; 
+  margin-bottom: 30px;
+  background-color: #a6a6a6;
+  opacity: 90%;
+  border:1px solid;
+  align-content: center;
+}
+
+.formPt2 input[type=submit]{
+  margin-left: 30%;
+  padding: 20px 20px 20px 20px;
+}
+.formPt2 input[type=submit]:hover, a:hover,select:hover{
+  background-color:#c9c9c9;
+}
+.signIn{
+  font-size:30px;
+  color:rgba(174 0 0 / 80%);
+}
+.signInText{
+  text-align: center;
+  margin-bottom: 10px;
+  margin-right:20%;
+}
+.header{
+  text-align: center;
+  width: 100%;
+  
+  font-size:64px;
+  color: #ffffff;
+}
+.login{
+  text-align: left;
+  text-decoration: none;
+  width:5%;
+  font-size:24px;
+  margin-top: 100px;
+  margin-left: 20%;
+  top:100px;
+  background-color: #a6a6a6;
+  opacity: 90%;
+  padding: 12px 10% 12px 10%;
+
+}
+.login:hover{
+  background-color: #c9c9c9;
+}

@@ -1,20 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Login</title>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/login.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Login</title>
+	</head>
 
-</head>
+	<body>
+		<div class="header">
+			One Media
+		</div>
+		<div class="container">
+			<div class="formElements" >
+				<form target="_self" action="/login" method="POST" class="formElements">
+					<div class="user">
+						<label for="user">Username or Email</label><br>
+						<input type="text" id="user" name="user">
+					</div>
 
-<body>
-<form target="_self" action="/login" method="POST">
-<input id="user" name="user">
-<input type="password"id="pass" name="pass">
-<input type="submit">
-</form>
+					<div class="pass">
+						<label for="password">Password</label><br>
+						<input type="password"id="pass" name="pass">
+					</div>
+					<div class="submit">
+						<input type="submit">
+					</div>
+				</form>
+			</div>
+			<div class="newAccount">
+				Don't have an Account?<br> Register Now!
+				<a class="register"href="/newAccount.html">Register</a>
+			</div>
+		</div>
+		<script src="Login.js"></script>
 
-
-<script src="Login.js"></script>
-
-</body>
-
+	</body>
 </html>

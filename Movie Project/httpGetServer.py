@@ -86,8 +86,24 @@ class GetHandler(BaseHTTPRequestHandler):
 			for accounts in GetHandler.allowLogin:
 				if GetHandler.allowLogin[accounts][0] == True:
 					GetHandler.allowLogin[accounts][0]=False
-			print(GetHandler.allowLogin)
 			sendResponse(self,200,'Location','/login.html',b'')
+		elif urlRecieved =='/styles.css':
+			openRequest(self,x,'')
+		elif urlRecieved =='/login.css':
+			openRequest(self,x,r'\login')
+		elif urlRecieved =='/accountStyles.css':
+			openRequest(self,x,r'\createAccount')
+		elif urlRecieved == '/loginImage.jpg':
+			ftp = FTP(ipaddress)
+			ftp.login(user,password)
+			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Images/loginImage2.jpg')
+			sendResponse(self,200,'Content-Type','image/jpg; utf-8',fh.read())
+		elif urlRecieved == '/favicon.ico':
+			print("here")
+			ftp = FTP(ipaddress)
+			ftp.login(user,password)
+			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Images/icon.ico')
+			sendResponse(self,200, 'Content-Type','image/x-icon; utf-8',fh.read())
 		else:
 			sendResponse(self,200,'Content-Type','application/json; utf-8',b'')
 			

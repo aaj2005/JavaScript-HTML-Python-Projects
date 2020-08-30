@@ -90,7 +90,6 @@ function addToTable(ulName,tableToRetrieve,clickedElement= 1){
 		}		
 	}	
 }
-
 		
 async function logout(){
 	let logout=await fetch('/logout',{method : 'GET', headers:{'Content-Type':'application/json'}});
