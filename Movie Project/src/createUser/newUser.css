@@ -1,0 +1,74 @@
+html{
+  position: fixed;
+  display: flex;
+  background-image: url(/loginImage.jpg);
+  opacity: 100%;
+  background-repeat: no-repeat;
+
+}
+body{
+  position: fixed;
+  margin:0px 0px 0px 0px; 
+  width:100%;
+  height: 100vh;
+}
+#nameOfAccount{
+	height: 5%;
+	width:100%;
+	font-size:32px;
+	text-align: center;
+}
+.container{
+  margin-top: 5%;
+  margin-left: 23%;
+  width:55%;
+  opacity: 90%;
+  background-color: #e3e3e3;
+}
+.users{
+  text-align: center;
+  display: flex;
+
+  flex-direction: column;
+  height:100%;
+  width:100%;
+}
+#users{
+  margin-top: 5%;
+  width:100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  
+}
+#createUser{
+  height: 85%;
+  width:50%;
+	font-size:44px;
+}
+.list{
+  height: 100%;
+  display:flex;
+  margin-left:25%;
+  text-align:center;
+  font-size:44px;
+  flex-direction:row;
+  flex-wrap:wrap;
+}
+#overlay {
+  position: fixed; /* Sit on top of the page content */
+  justify-content: center;
+  align-items: center;
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+}

@@ -17,7 +17,6 @@ import classes
 user="Ali" #ftp user name
 password="aaj2005" #ftp password
 ipaddress= socket.gethostbyname(socket.gethostname()) #ipv4 address
-
 global username
 
 
@@ -93,13 +92,14 @@ class GetHandler(BaseHTTPRequestHandler):
 			openRequest(self,x,r'\login')
 		elif urlRecieved =='/accountStyles.css':
 			openRequest(self,x,r'\createAccount')
+		elif urlRecieved =='/newUser.css':
+			openRequest(self,x,r'\createUser')
 		elif urlRecieved == '/loginImage.jpg':
 			ftp = FTP(ipaddress)
 			ftp.login(user,password)
 			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Images/loginImage2.jpg')
 			sendResponse(self,200,'Content-Type','image/jpg; utf-8',fh.read())
 		elif urlRecieved == '/favicon.ico':
-			print("here")
 			ftp = FTP(ipaddress)
 			ftp.login(user,password)
 			fh = ftpRequest.urlopen('ftp://'+user+":"+password+'@'+ipaddress+'/Images/icon.ico')
@@ -210,5 +210,5 @@ class GetHandler(BaseHTTPRequestHandler):
 if __name__ == '__main__':
 	from http.server import HTTPServer
 	server= HTTPServer((ipaddress,1234), GetHandler)
-	print("Server Starting")
+	print("Server Starting at ",ipaddress)
 	server.serve_forever()

@@ -39,7 +39,7 @@ function loadDropDown(){
 let movieDetails;
 function getName(){
 	let onRequest = new XMLHttpRequest();
-	onRequest.open("POST" , "/getName", true);
+	onRequest.open("POST" , "/getShowData", true);
 	onRequest.setRequestHeader("Content-type", "text/strings; utf-8");
 	onRequest.send(document.getElementById("selector").value)
 	onRequest.onload = function() {

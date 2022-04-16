@@ -1,59 +1,38 @@
 <!DOCTYPE html>
-<html><head>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Create User</title>
-<style>
-/*html{
-	background-color:#bdc9de;
-}*/
-#div1{
-	position:absolute;
-	top: 20%;
-	left:40%;
-	font-size: 20px;
-	user-select: none; 
-	padding:10px;
-}
-#add:hover{
-	
-}
-#overlay {
-  position: fixed; /* Sit on top of the page content */
-  justify-content: center;
-  align-items: center;
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
-  cursor: pointer; /* Add a pointer on hover */
-}
-</style>
-</head>
+<html>
+  <head>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title>Create User</title>
+    <link rel="stylesheet" type="text/css" href="/newUser.css">
 
-<body>
-<button onclick="logout()">logout</button>
-<div id='overlay'>
-  <form method="POST" action="/createUser">
-    <label>Name</label><input name="Name"></input>
-    <label>Restriction:</label><input name="Restriction"></input>
-    <input type="text" id="accountname"name="accountname" style="display: none;"readonly></input>
-    <input type="Submit"></input>
-  </form>
-</div>
+  </head>
 
-<div id="nameOfAccount"></div>
-<div id="div1">
-<button id="add">+</button>
-</div>
-
-<script src="newUser.js"></script>
+  <body>
+    <button onclick="logout()">logout</button>
+    <div id='overlay'>
+      <form method="POST" action="/createUser">
+        <label>Name</label><input name="Name"></input>
+        <label>Restriction:</label><input name="Restriction"></input>
+        <input type="text" id="accountname"name="accountname" style="display: none;"readonly></input>
+        <input type="Submit"></input>
+      </form>
+    </div>
+    <div class="container">
+      <div class="users">
+        <div id="nameOfAccount"> 
+        </div>
+        <div id="users">
+          <div class="list">
+            <button id="createUser" class="createUser">+</button>
+            <label style="text-align:left;">Create User</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="newUser.js"></script>
 
 
 
 
-</body></html>
+  </body>
+</html>

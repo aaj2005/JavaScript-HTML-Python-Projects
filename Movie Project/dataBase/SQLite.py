@@ -160,6 +160,7 @@ def retrieveData(table,selection,inputID="", email="",movieName="",showId='',use
 			return c.fetchall()
 		conn.close()
 	elif inputID=='' and movieName=='':
+		print("here")
 		with conn:
 			c.execute("SELECT "+selection+" FROM "+table+" WHERE username=:username OR email=:email",
 			{'username':email,'email':email})

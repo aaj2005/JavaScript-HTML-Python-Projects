@@ -15,10 +15,10 @@ def insertShows(movieData,showData):
 		newID=SQLite.getMaxValue("showID", "tvShows")[0][0]+1
 		if newID >= 1:
 			SQLite.insertShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
-			showData[movieData['name']](classes.tvShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
+			showData[movieData['name']]=(classes.tvShows(newID,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 	except:
 			SQLite.insertShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction'])
-			showData[movieData['name']](classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
+			showData[movieData['name']]=(classes.tvShows(1,movieData['name'],movieData['date'],movieData['category'],movieData['runTime'],movieData['expiry'],movieData['restriction']))
 	return showData
 def updateShows(movieData,ID):
 	try:
@@ -35,11 +35,10 @@ def checkMovieData(self,movieDataInDict):
 	if type(movieDataInDict) is dict:
 		for x in movieDataInDict:
 			if x=="name":
-				checkMovie=SQLite.retrieveData('tvShows','name',movieName=movieDataInDict[x])[0][0]
+				checkMovie=SQLite.retrieveData('tvShows','name',movieName=movieDataInDict[x])
 				movieNameLen=len(str(movieDataInDict[x]))
-				print(checkMovie)
-				if movieNameLen>150 or checkMovie!=None:
-					print('wrong name')
+				if movieNameLen>150 or checkMovie!=[]:
+					print(checkMovie)
 					sendResponse(self,200,'Content-Type','text/plain; utf-8',b'False')
 					break
 				else:
@@ -132,7 +131,6 @@ def createNewAccount(self,decodedBody,invalidOption,accountData):
 		userCompare=SQLite.retrieveData('accounts','email,username','',formDict['mail'])
 		mailCompare=SQLite.retrieveData('accounts','email,username','',formDict['user'])
 		if mailCompare == [] and userCompare==[]:
-			print(accountData)
 			try:
 				newID=SQLite.getMaxValue('accountID','accounts')[0][0]+1
 				SQLite.insertAccounts(newID,formDict['firstName'],formDict['lastName'],formDict['dateOfBirth'],formDict['user'],formDict['pass'],formDict['mail'],True,formDict['package'])
@@ -190,7 +188,6 @@ def createUser(self,formData,userData):
 	except:
 		pass
 	if maxUserID is not None:
-		print(type(maxUserID))
 		SQLite.insertUsers(maxUserID+1,profileName,accountID,restriction)
 		userData[profileName+str(accountID)]=classes.users(maxUserID+1,profileName,accountID,restriction)
 	else:

@@ -17,7 +17,6 @@ def loadDropDown():
 		listInStr="No Data Stored"
 	return listInStr
 def openRequest(self,x,url,body=None,responseCode=200):
-	print(x,"XXX")
 	mimeType= os.path.splitext(x)
 	dictionary={
 		"html":"text/html",
@@ -28,7 +27,6 @@ def openRequest(self,x,url,body=None,responseCode=200):
 	self.send_response(responseCode)
 	self.send_header('Content-Type', dictionary[mimeType[1][1:]] +'; utf-8')
 	self.end_headers()
-	print(dictionary[mimeType[1][1:]])
 	if body is None:
 		path = r"C:\Users\alial\Desktop\Programs\JavaScript Practice Programs\Movie Project\src"+ url + x
 		with open(path,"r",encoding="utf-8") as f:
